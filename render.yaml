@@ -25,8 +25,9 @@ services:
       - key: KEY_ENCRYPTION_SECRET
         sync: false
 
-  - type: static_site
+  - type: web
     name: warden-console
+    runtime: static
     buildCommand: cd frontend && npm ci && npm run build
     staticPublishPath: ./frontend/dist
     # Backend host is wired dynamically; the app prepends https:// (see api.js).
