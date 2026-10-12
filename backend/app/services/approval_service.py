@@ -155,8 +155,10 @@ def approve_request(
         raise ValueError(f"Approval request {approval_id} is already resolved ({approval['status']})")
 
     # 1. SEPARATION OF DUTIES ENFORCEMENT
+    # Admin override: single-operator deployments where the admin owns the
+    # agent passports would otherwise deadlock (nobody could ever approve).
     agent = get_agent_by_id(approval["agent_id"])
-    if agent and agent["owner"] == user["username"]:
+    if agent and agent["owner"] == user["username"] and user.get("role") != "admin":
         raise PermissionError(
             f"Separation of duties violation: User '{user['username']}' owns agent '{approval['agent_id']}' and cannot approve its actions."
         )

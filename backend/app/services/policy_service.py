@@ -11,6 +11,8 @@ from typing import Any, Dict, List, Optional
 import httpx
 from app.config import settings
 from app.db import get_connection
+import os
+import time
 
 RESTRICTED_ACTIONS = [
     "delete_database",
@@ -20,6 +22,69 @@ RESTRICTED_ACTIONS = [
     "bypass_governance",
     "execute_arbitrary_code"
 ]
+
+# --- Gibberish / keyboard-mash input guard ---------------------------------
+# Nonsense input (e.g. "sdfvgbhnjm...") sent repeatedly is an abuse pattern:
+# each attempt is BLOCKED and logged, and after GIBBERISH_THRESHOLD strikes
+# within GIBBERISH_WINDOW_S seconds the agent is paused (kill switch).
+GIBBERISH_THRESHOLD = int(os.getenv("WARDEN_GIBBERISH_THRESHOLD", "3"))
+GIBBERISH_WINDOW_S = int(os.getenv("WARDEN_GIBBERISH_WINDOW_S", "300"))
+_gibberish_hits: Dict[str, List[float]] = {}
+
+
+def looks_like_gibberish(text: Any) -> bool:
+    """Heuristic: long letter-run with almost no vowels and no word structure."""
+    if not isinstance(text, str):
+        return False
+    t = text.strip()
+    if len(t) < 12:
+        return False
+    letters = [c for c in t.lower() if c.isalpha()]
+    if len(letters) < 8:
+        return False  # mostly digits/symbols (e.g. tracking IDs) — allow
+    vowels = sum(1 for c in letters if c in "aeiou")
+    if vowels / len(letters) >= 0.25:
+        return False
+    if len(t.split()) >= 3:
+        return False  # real sentences have word structure — allow
+    return True
+
+
+def check_gibberish_input(agent_id: Optional[str], params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Inspect free-text params. Returns a BLOCK verdict dict or None."""
+    text = " ".join(
+        str((params or {}).get(k, "")) for k in ("user_request", "reason")
+        if (params or {}).get(k)
+    )
+    if not looks_like_gibberish(text):
+        return None
+    now = time.time()
+    key = agent_id or "?"
+    hits = [ts for ts in _gibberish_hits.get(key, []) if now - ts < GIBBERISH_WINDOW_S]
+    hits.append(now)
+    _gibberish_hits[key] = hits
+    count = len(hits)
+    if count >= GIBBERISH_THRESHOLD:
+        return {
+            "allow": False,
+            "violations": [
+                f"Repeated nonsense/keyboard-mash input detected ({count} in {GIBBERISH_WINDOW_S}s) — abusive input pattern"
+            ],
+            "soft_denials": [],
+            "reviews": [],
+            "engine": "warden_guard",
+        }
+    return {
+        "allow": False,
+        "violations": [],
+        "soft_denials": [{
+            "rule": "gibberish_input",
+            "message": f"Nonsense input rejected ({count}/{GIBBERISH_THRESHOLD} strikes) — repeated abuse will pause the agent",
+        }],
+        "reviews": [],
+        "engine": "warden_guard",
+    }
+
 
 def evaluate_python_rules(input_data: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -98,6 +163,12 @@ async def evaluate_policy(
         "order": order or {},
         "metadata": _request_metadata(agent.get("agent_id", "")),
     }
+
+    # Gibberish guard runs before OPA so nonsense is always judged by WARDEN
+    # itself (and logged), no matter what the uploaded bundle contains.
+    guard = check_gibberish_input((agent or {}).get("agent_id"), input_data.get("params") or {})
+    if guard is not None:
+        return guard
 
     # Try OPA HTTP if configured and reachable
     if settings.OPA_URL:

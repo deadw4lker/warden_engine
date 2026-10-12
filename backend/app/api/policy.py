@@ -331,6 +331,21 @@ def _extract_bundle_upload(data: bytes) -> dict[str, str]:
     return files
 
 
+@router.get("/policy/bundle")
+@router.get("/v1/policy/bundle")
+def get_bundle(user: dict = Depends(get_current_user)):
+    """List the active OPA bundle: file names + rego source shown in the UI."""
+    d = _bundle_dir()
+    files = []
+    for name in _list_rego():
+        try:
+            content = (d / name).read_text(encoding="utf-8")
+        except OSError:
+            content = ""
+        files.append({"name": name, "content": content, "size": len(content)})
+    return {"files": files, "meta": _read_bundle_meta(), "count": len(files)}
+
+
 @router.post("/policy/bundle")
 @router.post("/v1/policy/bundle")
 async def upload_bundle(file: UploadFile = File(...),

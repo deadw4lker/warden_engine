@@ -139,56 +139,56 @@ function getDecisionBadge(decision) {
     case 'ALLOW':
     case 'APPROVED':
       return {
-        bg: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
-        dot: 'bg-slate-400',
+        bg: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        dot: 'bg-emerald-600',
         label: dec
       };
     case 'PENDING_APPROVAL':
       return {
-        bg: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
-        dot: 'bg-slate-400',
+        bg: 'bg-amber-50 text-amber-800 border-amber-200',
+        dot: 'bg-amber-600',
         label: 'PENDING'
       };
     case 'ESCALATED':
       return {
-        bg: 'bg-slate-500/15 text-slate-300 border-slate-500/40',
-        dot: 'bg-slate-300',
+        bg: 'bg-orange-50 text-orange-800 border-orange-200',
+        dot: 'bg-orange-600',
         label: 'ESCALATED'
       };
     case 'BLOCKED':
       return {
-        bg: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
-        dot: 'bg-slate-400',
+        bg: 'bg-red-50 text-red-800 border-red-200',
+        dot: 'bg-red-600',
         label: 'BLOCKED'
       };
     case 'KILL_SWITCH':
       return {
-        bg: 'bg-slate-500/20 text-slate-300 border-slate-500/50 animate-pulse',
-        dot: 'bg-slate-400',
+        bg: 'bg-red-100 text-red-900 border-red-300',
+        dot: 'bg-red-700',
         label: 'KILL SWITCH'
       };
     case 'REJECTED':
       return {
-        bg: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
-        dot: 'bg-slate-400',
+        bg: 'bg-red-50 text-red-800 border-red-200',
+        dot: 'bg-red-600',
         label: 'REJECTED'
       };
     case 'TIMEOUT':
       return {
-        bg: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
-        dot: 'bg-slate-400',
+        bg: 'bg-stone-100 text-stone-700 border-stone-300',
+        dot: 'bg-stone-500',
         label: 'TIMEOUT'
       };
     case 'HUMAN_ONLY':
       return {
-        bg: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
-        dot: 'bg-slate-400',
+        bg: 'bg-stone-900 text-white border-stone-900',
+        dot: 'bg-white',
         label: 'HUMAN ONLY'
       };
     default:
       return {
-        bg: 'bg-slate-700/40 text-slate-400 border-slate-700',
-        dot: 'bg-slate-400',
+        bg: 'bg-stone-100 text-stone-600 border-stone-200',
+        dot: 'bg-stone-400',
         label: dec || 'SYSTEM'
       };
   }
@@ -197,30 +197,30 @@ function getDecisionBadge(decision) {
 function getEventBadge(eventType) {
   const et = (eventType || '').toUpperCase();
   if (et === 'ACTION_ALLOWED') {
-    return { icon: ShieldCheck, color: 'text-slate-400', bg: 'bg-slate-500/10 border-slate-500/20' };
+    return { icon: ShieldCheck, color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' };
   }
   if (et === 'ACTION_APPROVED') {
-    return { icon: CheckCircle2, color: 'text-slate-400', bg: 'bg-slate-500/10 border-slate-500/20' };
+    return { icon: CheckCircle2, color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' };
   }
   if (et === 'APPROVAL_REQUESTED') {
-    return { icon: Clock, color: 'text-slate-400', bg: 'bg-slate-500/10 border-slate-500/20' };
+    return { icon: Clock, color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200' };
   }
   if (et === 'APPROVAL_ESCALATED') {
-    return { icon: ArrowUpRight, color: 'text-slate-400', bg: 'bg-slate-500/10 border-slate-500/20' };
+    return { icon: ArrowUpRight, color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200' };
   }
   if (et === 'ACTION_BLOCKED') {
-    return { icon: Ban, color: 'text-slate-400', bg: 'bg-slate-500/10 border-slate-500/20' };
+    return { icon: Ban, color: 'text-red-700', bg: 'bg-red-50 border-red-200' };
   }
   if (et === 'ACTION_REJECTED') {
-    return { icon: XCircle, color: 'text-slate-400', bg: 'bg-slate-500/10 border-slate-500/20' };
+    return { icon: XCircle, color: 'text-red-700', bg: 'bg-red-50 border-red-200' };
   }
   if (et === 'KILL_SWITCH_TRIGGERED') {
-    return { icon: Zap, color: 'text-slate-400', bg: 'bg-slate-500/20 border-slate-500/40' };
+    return { icon: Zap, color: 'text-red-800', bg: 'bg-red-100 border-red-300' };
   }
   if (et === 'APPROVAL_TIMEOUT') {
-    return { icon: AlertTriangle, color: 'text-slate-400', bg: 'bg-slate-500/10 border-slate-500/20' };
+    return { icon: AlertTriangle, color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200' };
   }
-  return { icon: Hash, color: 'text-slate-400', bg: 'bg-slate-800 border-slate-700' };
+  return { icon: Hash, color: 'text-stone-500', bg: 'bg-stone-100 border-stone-200' };
 }
 
 function getRiskPill(riskLevel, riskScore) {
@@ -229,30 +229,30 @@ function getRiskPill(riskLevel, riskScore) {
   if (level === 'LOW') {
     return {
       label: scoreText ? `${scoreText} Low` : 'Low',
-      classes: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+      classes: 'bg-emerald-50 text-emerald-800 border-emerald-200'
     };
   }
   if (level === 'MEDIUM') {
     return {
       label: scoreText ? `${scoreText} Med` : 'Medium',
-      classes: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+      classes: 'bg-amber-50 text-amber-800 border-amber-200'
     };
   }
   if (level === 'HIGH') {
     return {
       label: scoreText ? `${scoreText} High` : 'High',
-      classes: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+      classes: 'bg-red-50 text-red-800 border-red-200'
     };
   }
   if (level === 'RESTRICTED') {
     return {
       label: 'Restricted',
-      classes: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+      classes: 'bg-stone-900 text-white border-stone-900'
     };
   }
   return {
     label: scoreText ? `${scoreText}` : '—',
-    classes: 'bg-slate-800 text-slate-400 border-slate-700'
+    classes: 'bg-stone-100 text-stone-600 border-stone-200'
   };
 }
 
@@ -332,28 +332,28 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
       />
 
       {/* Drawer content */}
-      <div className="relative w-full max-w-xl bg-[#0c1222] border-l border-slate-800 shadow-2xl flex flex-col h-full z-10 overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-white border-l border-stone-200 shadow-2xl flex flex-col h-full z-10 overflow-y-auto">
         {/* Drawer Header */}
-        <div className="sticky top-0 bg-[#0c1222]/95 backdrop-blur border-b border-slate-800 p-5 flex items-center justify-between z-20">
+        <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-stone-200 p-5 flex items-center justify-between z-20">
           <div className="flex items-center space-x-3">
-            <span className="font-mono text-xs px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 font-bold border border-slate-700">
+            <span className="font-mono text-xs px-2.5 py-1 rounded-md bg-stone-100 text-stone-700 font-semibold border border-stone-300">
               #{entry.id}
             </span>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-base font-bold text-white">{entry.event_type}</h3>
-                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${decisionBadge.bg}`}>
+                <h3 className="text-base font-semibold text-stone-900">{entry.event_type}</h3>
+                <span className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${decisionBadge.bg}`}>
                   {decisionBadge.label}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-mono mt-0.5" title={formatFullTime(entry.timestamp)}>
+              <p className="text-xs text-stone-600 font-mono mt-0.5" title={formatFullTime(entry.timestamp)}>
                 {formatRelativeTime(entry.timestamp)} · {formatFullTime(entry.timestamp)}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-1.5 rounded-md border border-stone-300 text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition"
             aria-label="Close drawer"
           >
             <X className="w-5 h-5" />
@@ -363,27 +363,27 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
         {/* Drawer Body */}
         <div className="p-5 space-y-5 flex-1">
           {/* Explanation Callout */}
-          <div className="rounded-xl p-4 bg-slate-900/90 border border-slate-800 space-y-1.5">
-            <div className="text-[11px] font-bold tracking-wider text-slate-400 uppercase font-mono flex items-center space-x-1.5">
-              <Info className="w-3.5 h-3.5 text-slate-400" />
+          <div className="rounded-md p-4 bg-stone-50 border border-stone-200 space-y-1.5">
+            <div className="text-[11px] font-semibold tracking-wider text-stone-600 uppercase font-mono flex items-center space-x-1.5">
+              <Info className="w-3.5 h-3.5 text-stone-600" />
               <span>Explanation</span>
             </div>
-            <p className="text-sm text-slate-200 leading-relaxed font-medium">
+            <p className="text-sm text-stone-800 leading-relaxed font-medium">
               {explanation}
             </p>
           </div>
 
           {/* Policy Violations (if present) */}
           {violations.length > 0 && (
-            <div className="rounded-xl p-4 bg-slate-500/10 border border-slate-500/30 space-y-2">
-              <div className="text-[11px] font-bold tracking-wider text-slate-400 uppercase font-mono flex items-center space-x-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-slate-400" />
+            <div className="rounded-md p-4 bg-stone-100 border border-stone-300 space-y-2">
+              <div className="text-[11px] font-semibold tracking-wider text-stone-600 uppercase font-mono flex items-center space-x-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-stone-600" />
                 <span>Policy Violations ({violations.length})</span>
               </div>
-              <ul className="space-y-1.5 text-xs text-slate-200">
+              <ul className="space-y-1.5 text-xs text-stone-900">
                 {violations.map((v, i) => (
                   <li key={i} className="flex items-start space-x-2">
-                    <span className="text-slate-400 font-bold mt-0.5">•</span>
+                    <span className="text-stone-600 font-semibold mt-0.5">•</span>
                     <span>{v}</span>
                   </li>
                 ))}
@@ -393,31 +393,31 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
 
           {/* Action & Agent Context */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[10px] text-slate-500 uppercase font-mono">Agent</span>
-              <p className="text-sm font-semibold text-slate-200 mt-0.5 flex items-center space-x-1.5">
-                <Bot className="w-4 h-4 text-slate-400 shrink-0" />
+            <div className="p-3.5 rounded-md bg-stone-50 border border-stone-200">
+              <span className="text-[10px] text-stone-500 uppercase font-mono">Agent</span>
+              <p className="text-sm font-semibold text-stone-800 mt-0.5 flex items-center space-x-1.5">
+                <Bot className="w-4 h-4 text-stone-600 shrink-0" />
                 <span className="truncate">{payload.agent_id || entry.actor}</span>
               </p>
             </div>
-            <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[10px] text-slate-500 uppercase font-mono">Action & Amount</span>
-              <p className="text-sm font-semibold text-slate-200 mt-0.5 font-mono truncate">
+            <div className="p-3.5 rounded-md bg-stone-50 border border-stone-200">
+              <span className="text-[10px] text-stone-500 uppercase font-mono">Action & Amount</span>
+              <p className="text-sm font-semibold text-stone-800 mt-0.5 font-mono truncate">
                 {payload.action || '—'}
                 {payload.amount !== undefined && payload.amount > 0 && (
-                  <span className="ml-1.5 text-slate-400">({formatCurrency(payload.amount)})</span>
+                  <span className="ml-1.5 text-stone-600">({formatCurrency(payload.amount)})</span>
                 )}
               </p>
             </div>
           </div>
 
           {/* Risk Score Breakdown */}
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
+          <div className="p-4 rounded-md bg-stone-50 border border-stone-200 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase font-mono">
+              <span className="text-[11px] font-semibold tracking-wider text-stone-600 uppercase font-mono">
                 Risk Score Breakdown
               </span>
-              <span className="text-xs font-mono font-bold text-slate-400">
+              <span className="text-xs font-mono font-medium text-stone-600">
                 Score: {risk.score !== undefined ? risk.score : '0.00'} · {risk.risk_level}
               </span>
             </div>
@@ -425,15 +425,15 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
             <div className="space-y-2.5 text-xs">
               {/* Money Factor */}
               <div>
-                <div className="flex justify-between text-slate-400 mb-1">
+                <div className="flex justify-between text-stone-600 mb-1">
                   <span>Financial Exposure</span>
-                  <span className="font-mono text-slate-300">
+                  <span className="font-mono text-stone-700">
                     {Math.round((risk.money_factor || 0) * 100)}% {payload.amount ? `(${formatCurrency(payload.amount)})` : ''}
                   </span>
                 </div>
-                <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="bg-slate-400 h-1.5 rounded-full transition-all duration-300"
+                    className="bg-stone-400 h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${Math.min(Math.max((risk.money_factor || 0) * 100, 2), 100)}%` }}
                   />
                 </div>
@@ -441,15 +441,15 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
 
               {/* Records Factor */}
               <div>
-                <div className="flex justify-between text-slate-400 mb-1">
+                <div className="flex justify-between text-stone-600 mb-1">
                   <span>Affected Records</span>
-                  <span className="font-mono text-slate-300">
+                  <span className="font-mono text-stone-700">
                     {Math.round((risk.records_factor || 0) * 100)}% {payload.records_affected ? `(${payload.records_affected} recs)` : ''}
                   </span>
                 </div>
-                <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="bg-slate-400 h-1.5 rounded-full transition-all duration-300"
+                    className="bg-stone-400 h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${Math.min(Math.max((risk.records_factor || 0) * 100, 2), 100)}%` }}
                   />
                 </div>
@@ -457,15 +457,15 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
 
               {/* Irreversibility */}
               <div>
-                <div className="flex justify-between text-slate-400 mb-1">
+                <div className="flex justify-between text-stone-600 mb-1">
                   <span>Irreversibility</span>
-                  <span className="font-mono text-slate-300">
+                  <span className="font-mono text-stone-700">
                     {Math.round((risk.irreversibility_factor || 0) * 100)}% ({payload.reversibility || 'partially'})
                   </span>
                 </div>
-                <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="bg-slate-400 h-1.5 rounded-full transition-all duration-300"
+                    className="bg-stone-400 h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${Math.min(Math.max((risk.irreversibility_factor || 0) * 100, 2), 100)}%` }}
                   />
                 </div>
@@ -474,19 +474,19 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
           </div>
 
           {/* Cryptographic Chain Proof */}
-          <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div className="p-4 rounded-md bg-stone-50 border border-stone-200 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase font-mono flex items-center space-x-1.5">
-                <ShieldCheck className="w-4 h-4 text-slate-400" />
+              <span className="text-[11px] font-semibold tracking-wider text-stone-600 uppercase font-mono flex items-center space-x-1.5">
+                <ShieldCheck className="w-4 h-4 text-stone-600" />
                 <span>Cryptographic Chain Proof</span>
               </span>
               {proofLoading ? (
-                <Loader2 className="w-3.5 h-3.5 text-slate-500 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 text-stone-500 animate-spin" />
               ) : proof && (
-                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                <span className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${
                   proof.is_valid
-                    ? 'bg-slate-500/15 text-slate-400 border-slate-500/30'
-                    : 'bg-slate-500/15 text-slate-400 border-slate-500/30'
+                    ? 'bg-stone-900 text-white border-stone-900'
+                    : 'bg-stone-100 text-stone-600 border-stone-300'
                 }`}>
                   {proof.is_valid ? 'Chain Link Valid' : 'Integrity Broken'}
                 </span>
@@ -495,27 +495,27 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
 
             <div className="space-y-2 text-xs">
               {/* Current Hash */}
-              <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+              <div className="p-2.5 rounded-md bg-stone-950 border border-stone-200 flex items-center justify-between">
                 <div className="min-w-0 mr-2">
-                  <span className="text-[10px] text-slate-500 uppercase font-mono block">Entry Hash (SHA-256)</span>
-                  <code className="text-[11px] text-slate-400 font-mono truncate block" title={entry.hash}>
+                  <span className="text-[10px] text-stone-500 uppercase font-mono block">Entry Hash (SHA-256)</span>
+                  <code className="text-[11px] text-stone-400 font-mono truncate block" title={entry.hash}>
                     {entry.hash?.slice(0, 20)}...{entry.hash?.slice(-8)}
                   </code>
                 </div>
                 <button
                   onClick={() => handleCopy(entry.hash, 'hash')}
-                  className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition shrink-0"
+                  className="p-1.5 rounded text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition shrink-0"
                   title="Copy full hash"
                 >
-                  {copiedKey === 'hash' ? <Check className="w-3.5 h-3.5 text-slate-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedKey === 'hash' ? <Check className="w-3.5 h-3.5 text-stone-600" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
 
               {/* Prev Hash */}
-              <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+              <div className="p-2.5 rounded-md bg-stone-950 border border-stone-200 flex items-center justify-between">
                 <div className="min-w-0 mr-2">
-                  <span className="text-[10px] text-slate-500 uppercase font-mono block">Previous Hash (Parent Link)</span>
-                  <code className="text-[11px] text-slate-400 font-mono truncate block" title={entry.prev_hash}>
+                  <span className="text-[10px] text-stone-500 uppercase font-mono block">Previous Hash (Parent Link)</span>
+                  <code className="text-[11px] text-stone-400 font-mono truncate block" title={entry.prev_hash}>
                     {entry.prev_hash === '0'.repeat(64)
                       ? '00000000000000000000 (GENESIS)'
                       : `${entry.prev_hash?.slice(0, 20)}...${entry.prev_hash?.slice(-8)}`}
@@ -523,19 +523,19 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
                 </div>
                 <button
                   onClick={() => handleCopy(entry.prev_hash, 'prev_hash')}
-                  className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition shrink-0"
+                  className="p-1.5 rounded text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition shrink-0"
                   title="Copy previous hash"
                 >
-                  {copiedKey === 'prev_hash' ? <Check className="w-3.5 h-3.5 text-slate-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedKey === 'prev_hash' ? <Check className="w-3.5 h-3.5 text-stone-600" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
 
               {/* Link validation text */}
               {proof && (
-                <div className={`p-2.5 rounded-lg border text-[11px] ${
+                <div className={`p-2.5 rounded-md border text-[11px] ${
                   proof.is_valid
-                    ? 'bg-slate-500/10 border-slate-500/20 text-slate-400'
-                    : 'bg-slate-500/10 border-slate-500/20 text-slate-400'
+                    ? 'bg-stone-100 border-stone-200 text-stone-600'
+                    : 'bg-stone-100 border-stone-200 text-stone-600'
                 }`}>
                   <p className="font-semibold">{proof.message}</p>
                 </div>
@@ -544,26 +544,26 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
           </div>
 
           {/* Evidence Pack Collapsible Code */}
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+          <div className="p-4 rounded-md bg-stone-50 border border-stone-200 space-y-2">
             <div className="flex items-center justify-between">
               <button
                 onClick={() => setEvidenceOpen(o => !o)}
-                className="flex items-center space-x-2 text-xs font-bold text-slate-300 hover:text-white transition"
+                className="flex items-center space-x-2 text-xs font-semibold text-stone-700 hover:text-stone-900 transition"
               >
                 <ChevronDown className={`w-4 h-4 transition-transform ${evidenceOpen ? 'rotate-180' : ''}`} />
                 <span>Evidence Pack & Payload JSON</span>
               </button>
               <button
                 onClick={() => handleCopy(JSON.stringify(evidencePack, null, 2), 'evidence')}
-                className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center space-x-1 text-xs"
+                className="p-1.5 rounded text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition flex items-center space-x-1 text-xs"
               >
-                {copiedKey === 'evidence' ? <Check className="w-3.5 h-3.5 text-slate-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedKey === 'evidence' ? <Check className="w-3.5 h-3.5 text-stone-600" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedKey === 'evidence' ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
 
             {evidenceOpen && (
-              <pre className="text-[11px] font-mono text-slate-300 bg-slate-950 rounded-lg p-3 overflow-x-auto max-h-64 border border-slate-800">
+              <pre className="text-[11px] font-mono text-stone-300 bg-stone-950 rounded-md p-3 overflow-x-auto max-h-64 border border-stone-200">
                 {JSON.stringify(evidencePack, null, 2)}
               </pre>
             )}
@@ -609,26 +609,26 @@ function TamperConfirmModal({ isOpen, onClose, onTamper, currentEntries }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-[#0c1222] border border-slate-500/40 rounded-2xl p-6 max-w-md w-full shadow-2xl z-10 space-y-4 glow-rose">
-        <div className="flex items-center space-x-3 text-slate-400 font-bold">
-          <div className="p-2 rounded-lg bg-slate-500/15 border border-slate-500/30">
-            <AlertTriangle className="w-5 h-5 text-slate-400" />
+      <div className="fixed inset-0 bg-stone-950 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white border border-stone-300 rounded-md p-6 max-w-md w-full shadow-2xl z-10 space-y-4 glow-rose">
+        <div className="flex items-center space-x-3 text-stone-600 font-semibold">
+          <div className="p-2 rounded-md bg-stone-100 border border-stone-300">
+            <AlertTriangle className="w-5 h-5 text-stone-600" />
           </div>
           <div>
-            <h3 className="text-base text-white font-bold">Simulate Ledger Tampering</h3>
-            <p className="text-xs text-slate-400 font-normal">Dev-Only Audit Demonstration</p>
+            <h3 className="text-base text-stone-900 font-semibold">Simulate Ledger Tampering</h3>
+            <p className="text-xs text-stone-600 font-normal">Dev-Only Audit Demonstration</p>
           </div>
         </div>
 
-        <p className="text-xs text-slate-300 leading-relaxed">
+        <p className="text-xs text-stone-800 leading-relaxed">
           This test intentionally modifies a database record in-place without recomputing the SHA-256 hash.
-          When you click <strong className="text-white">Verify Chain</strong> afterwards, WARDEN will detect the exact tampered entry.
+          When you click <strong className="text-stone-900">Verify Chain</strong> afterwards, WARDEN will detect the exact tampered entry.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-[11px] font-mono text-slate-400 uppercase block mb-1">Target Entry ID</label>
+            <label className="text-[11px] font-mono text-stone-600 uppercase block mb-1">Target Entry ID</label>
             <input
               type="number"
               value={targetId}
@@ -636,25 +636,25 @@ function TamperConfirmModal({ isOpen, onClose, onTamper, currentEntries }) {
                 setTargetId(e.target.value);
                 setError('');
               }}
-              className={`w-full text-xs font-mono bg-slate-900 border rounded-lg px-3 py-2 text-white placeholder-slate-600 focus:outline-none transition ${
-                error ? 'border-slate-500' : 'border-slate-700 focus:border-slate-500'
+              className={`w-full text-xs font-mono bg-white border rounded-md px-3 py-2 text-stone-900 placeholder-stone-400 focus:outline-none transition ${
+                error ? 'border-stone-500' : 'border-stone-300 focus:border-stone-900'
               }`}
               required
             />
             {error && (
-              <p className="text-xs text-slate-400 mt-1 flex items-center space-x-1 font-medium">
+              <p className="text-xs text-stone-600 mt-1 flex items-center space-x-1 font-medium">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{error}</span>
               </p>
             )}
           </div>
           <div>
-            <label className="text-[11px] font-mono text-slate-400 uppercase block mb-1">Tamper Note</label>
+            <label className="text-[11px] font-mono text-stone-600 uppercase block mb-1">Tamper Note</label>
             <input
               type="text"
               value={note}
               onChange={e => setNote(e.target.value)}
-              className="w-full text-xs bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-slate-500"
+              className="w-full text-xs bg-white border border-stone-300 rounded-md px-3 py-2 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900"
               required
             />
           </div>
@@ -664,14 +664,14 @@ function TamperConfirmModal({ isOpen, onClose, onTamper, currentEntries }) {
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              className="px-4 py-2 rounded-md text-xs font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !targetId}
-              className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-600 hover:bg-slate-500 disabled:opacity-50 text-white transition flex items-center space-x-1.5"
+              className="px-4 py-2 rounded-md text-xs font-semibold bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white transition flex items-center space-x-1.5"
             >
               {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />}
               <span>{loading ? 'Injecting...' : 'Inject Tamper'}</span>
@@ -981,8 +981,8 @@ export default function LedgerExplorer() {
       {/* 1. Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Activity Logs</h1>
-          <p className="text-slate-400 text-sm mt-0.5">
+          <h1 className="text-xl font-semibold text-stone-900 tracking-tight">Activity Logs</h1>
+          <p className="text-stone-600 text-sm mt-0.5">
             Every AI action decision, tamper-evident
           </p>
         </div>
@@ -994,20 +994,20 @@ export default function LedgerExplorer() {
             <button
               onClick={handleVerifyChain}
               disabled={verifying}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 border transition ${
+              className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center space-x-2 border transition ${
                 verifyResult && !verifyResult.valid
-                  ? 'bg-slate-500/20 text-slate-300 border-slate-500/40 hover:bg-slate-500/30 glow-rose'
+                  ? 'bg-stone-100 text-stone-700 border-stone-300 hover:bg-stone-100 glow-rose'
                   : verifyResult && verifyResult.valid
-                  ? 'bg-slate-500/15 text-slate-300 border-slate-500/40 hover:bg-slate-500/25 glow-emerald'
-                  : 'bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800 hover:border-slate-600'
+                  ? 'bg-stone-100 text-stone-700 border-stone-300 hover:bg-stone-100 glow-emerald'
+                  : 'bg-white border-stone-300 text-stone-800 hover:bg-stone-100 hover:border-stone-300'
               }`}
             >
               {verifying ? (
-                <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
+                <Loader2 className="w-4 h-4 animate-spin text-stone-600" />
               ) : verifyResult && !verifyResult.valid ? (
-                <ShieldAlert className="w-4 h-4 text-slate-400" />
+                <ShieldAlert className="w-4 h-4 text-stone-600" />
               ) : (
-                <ShieldCheck className="w-4 h-4 text-slate-400" />
+                <ShieldCheck className="w-4 h-4 text-stone-600" />
               )}
               <span>
                 {verifying
@@ -1024,18 +1024,18 @@ export default function LedgerExplorer() {
           {/* Live Toggle */}
           <button
             onClick={() => setIsLive(l => !l)}
-            className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 border transition ${
+            className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center space-x-2 border transition ${
               isLive
-                ? 'bg-slate-900 border-slate-500/40 text-slate-200'
-                : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-200'
+                ? 'bg-white border-stone-300 text-stone-800'
+                : 'bg-white border-stone-300 text-stone-600 hover:text-stone-800'
             }`}
             title={isLive ? 'Live refresh active (every 5s)' : 'Live refresh paused'}
           >
             <span className="relative flex h-2 w-2">
               {isLive && (
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded bg-stone-400 opacity-75" />
               )}
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${isLive ? 'bg-slate-500' : 'bg-slate-500'}`} />
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${isLive ? 'bg-stone-900' : 'bg-stone-900'}`} />
             </span>
             <span>Live</span>
           </button>
@@ -1044,9 +1044,9 @@ export default function LedgerExplorer() {
           <button
             onClick={handleExportCSV}
             disabled={entries.length === 0}
-            className="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800 hover:border-slate-600 transition flex items-center space-x-2 disabled:opacity-50"
+            className="px-3 py-2 rounded-md text-xs font-semibold bg-white border border-stone-300 text-stone-800 hover:bg-stone-100 hover:border-stone-300 transition flex items-center space-x-2 disabled:opacity-50"
           >
-            <Download className="w-4 h-4 text-slate-400" />
+            <Download className="w-4 h-4 text-stone-600" />
             <span>Export CSV</span>
           </button>
 
@@ -1055,7 +1055,7 @@ export default function LedgerExplorer() {
             <div className="relative">
               <button
                 onClick={() => setDevMenuOpen(o => !o)}
-                className="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-500/10 border border-slate-500/30 text-slate-300 hover:bg-slate-500/20 transition flex items-center space-x-1.5"
+                className="px-3 py-2 rounded-md text-xs font-semibold bg-stone-100 border border-stone-300 text-stone-700 hover:bg-stone-100 transition flex items-center space-x-1.5"
               >
                 <Wrench className="w-3.5 h-3.5" />
                 <span>Dev Tools</span>
@@ -1065,15 +1065,15 @@ export default function LedgerExplorer() {
               {devMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-30" onClick={() => setDevMenuOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-slate-900 border border-slate-700 shadow-xl py-1.5 z-40">
+                  <div className="absolute right-0 mt-2 w-48 rounded-md bg-white border border-stone-300 shadow-xl py-1.5 z-40">
                     <button
                       onClick={() => {
                         setDevMenuOpen(false);
                         setTamperModalOpen(true);
                       }}
-                      className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-500/15 flex items-center space-x-2 transition"
+                      className="w-full text-left px-3 py-2 text-xs text-stone-800 hover:bg-stone-800/15 flex items-center space-x-2 transition"
                     >
-                      <AlertTriangle className="w-3.5 h-3.5 text-slate-400" />
+                      <AlertTriangle className="w-3.5 h-3.5 text-stone-600" />
                       <span>Simulate Tamper</span>
                     </button>
                   </div>
@@ -1089,95 +1089,95 @@ export default function LedgerExplorer() {
         {/* Total Events */}
         <button
           onClick={() => handleSummaryCardClick('ALL')}
-          className={`glass-panel p-4 rounded-xl text-left transition hover:border-slate-600 ${
-            isCardActive('ALL') ? 'border-slate-500/60 ring-1 ring-slate-500/40 bg-slate-500/5' : ''
+          className={`glass-panel p-4 rounded-md text-left transition hover:border-stone-300 ${
+            isCardActive('ALL') ? 'border-stone-500/60 ring-1 ring-stone-500/40 bg-stone-50' : ''
           }`}
         >
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-mono uppercase font-bold tracking-wider">Total Events</span>
-            <Hash className="w-4 h-4 text-slate-500" />
+          <div className="flex items-center justify-between text-stone-600 mb-1">
+            <span className="text-[11px] font-mono uppercase font-semibold tracking-wider">Total Events</span>
+            <Hash className="w-4 h-4 text-stone-500" />
           </div>
-          <p className="text-2xl font-extrabold text-white mt-1">
+          <p className="text-xl font-semibold text-stone-900 mt-1">
             {summaryMetrics.total}
           </p>
-          <span className="text-[10px] text-slate-500 mt-0.5 block">Recorded in chain</span>
+          <span className="text-[10px] text-stone-500 mt-0.5 block">Recorded in chain</span>
         </button>
 
         {/* Allowed */}
         <button
           onClick={() => handleSummaryCardClick('ALLOWED')}
-          className={`glass-panel p-4 rounded-xl text-left transition hover:border-slate-500/40 ${
-            isCardActive('ALLOWED') ? 'border-slate-500/60 ring-1 ring-slate-500/40 bg-slate-500/5' : ''
+          className={`glass-panel p-4 rounded-md text-left transition hover:border-stone-300 ${
+            isCardActive('ALLOWED') ? 'border-stone-500/60 ring-1 ring-stone-500/40 bg-stone-50' : ''
           }`}
         >
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-mono uppercase font-bold tracking-wider text-slate-400">Allowed</span>
-            <ShieldCheck className="w-4 h-4 text-slate-400" />
+          <div className="flex items-center justify-between text-stone-600 mb-1">
+            <span className="text-[11px] font-mono uppercase font-semibold tracking-wider text-stone-600">Allowed</span>
+            <ShieldCheck className="w-4 h-4 text-stone-600" />
           </div>
-          <p className="text-2xl font-extrabold text-slate-400 mt-1">
+          <p className="text-xl font-semibold text-stone-600 mt-1">
             {summaryMetrics.allowed}
           </p>
-          <span className="text-[10px] text-slate-500 mt-0.5 block">Approved / executed</span>
+          <span className="text-[10px] text-stone-500 mt-0.5 block">Approved / executed</span>
         </button>
 
         {/* Pending Approval */}
         <button
           onClick={() => handleSummaryCardClick('PENDING')}
-          className={`glass-panel p-4 rounded-xl text-left transition hover:border-slate-500/40 ${
-            isCardActive('PENDING') ? 'border-slate-500/60 ring-1 ring-slate-500/40 bg-slate-500/5' : ''
+          className={`glass-panel p-4 rounded-md text-left transition hover:border-stone-300 ${
+            isCardActive('PENDING') ? 'border-stone-500/60 ring-1 ring-stone-500/40 bg-stone-50' : ''
           }`}
         >
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-mono uppercase font-bold tracking-wider text-slate-400">Pending Review</span>
-            <Clock className="w-4 h-4 text-slate-400" />
+          <div className="flex items-center justify-between text-stone-600 mb-1">
+            <span className="text-[11px] font-mono uppercase font-semibold tracking-wider text-stone-600">Pending Review</span>
+            <Clock className="w-4 h-4 text-stone-600" />
           </div>
-          <p className="text-2xl font-extrabold text-slate-400 mt-1">
+          <p className="text-xl font-semibold text-stone-600 mt-1">
             {summaryMetrics.pending}
           </p>
-          <span className="text-[10px] text-slate-500 mt-0.5 block">Awaiting sign-off</span>
+          <span className="text-[10px] text-stone-500 mt-0.5 block">Awaiting sign-off</span>
         </button>
 
         {/* Blocked */}
         <button
           onClick={() => handleSummaryCardClick('BLOCKED')}
-          className={`glass-panel p-4 rounded-xl text-left transition hover:border-slate-500/40 ${
-            isCardActive('BLOCKED') ? 'border-slate-500/60 ring-1 ring-slate-500/40 bg-slate-500/5' : ''
+          className={`glass-panel p-4 rounded-md text-left transition hover:border-stone-300 ${
+            isCardActive('BLOCKED') ? 'border-stone-500/60 ring-1 ring-stone-500/40 bg-stone-50' : ''
           }`}
         >
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-mono uppercase font-bold tracking-wider text-slate-400">Blocked</span>
-            <Ban className="w-4 h-4 text-slate-400" />
+          <div className="flex items-center justify-between text-stone-600 mb-1">
+            <span className="text-[11px] font-mono uppercase font-semibold tracking-wider text-stone-600">Blocked</span>
+            <Ban className="w-4 h-4 text-stone-600" />
           </div>
-          <p className="text-2xl font-extrabold text-slate-400 mt-1">
+          <p className="text-xl font-semibold text-stone-600 mt-1">
             {summaryMetrics.blocked}
           </p>
-          <span className="text-[10px] text-slate-500 mt-0.5 block">Policy denied</span>
+          <span className="text-[10px] text-stone-500 mt-0.5 block">Policy denied</span>
         </button>
 
         {/* Kill-Switch Triggers */}
         <button
           onClick={() => handleSummaryCardClick('KILL_SWITCH')}
-          className={`glass-panel p-4 rounded-xl text-left transition hover:border-slate-500/40 ${
-            isCardActive('KILL_SWITCH') ? 'border-slate-500/60 ring-1 ring-slate-500/40 bg-slate-500/5' : ''
+          className={`glass-panel p-4 rounded-md text-left transition hover:border-stone-300 ${
+            isCardActive('KILL_SWITCH') ? 'border-stone-500/60 ring-1 ring-stone-500/40 bg-stone-50' : ''
           }`}
         >
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-mono uppercase font-bold tracking-wider text-slate-400">Kill Switches</span>
-            <Zap className="w-4 h-4 text-slate-400" />
+          <div className="flex items-center justify-between text-stone-600 mb-1">
+            <span className="text-[11px] font-mono uppercase font-semibold tracking-wider text-stone-600">Kill Switches</span>
+            <Zap className="w-4 h-4 text-stone-600" />
           </div>
-          <p className="text-2xl font-extrabold text-slate-400 mt-1">
+          <p className="text-xl font-semibold text-stone-600 mt-1">
             {summaryMetrics.killSwitch}
           </p>
-          <span className="text-[10px] text-slate-500 mt-0.5 block">Circuit breaker</span>
+          <span className="text-[10px] text-stone-500 mt-0.5 block">Circuit breaker</span>
         </button>
       </div>
 
       {/* 3. Filter Bar */}
-      <div className="glass-panel rounded-2xl p-4 space-y-3">
+      <div className="glass-panel rounded-md p-4 space-y-3">
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
           {/* Search box */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-stone-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search agent, action, decision ID, actor..."
@@ -1186,12 +1186,12 @@ export default function LedgerExplorer() {
                 setSearchQuery(e.target.value);
                 setPage(1);
               }}
-              className="w-full text-xs bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-8 py-2.5 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-slate-500 transition"
+              className="w-full text-xs bg-white border border-stone-300 rounded-lg pl-9 pr-8 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 transition"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-700"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -1202,10 +1202,10 @@ export default function LedgerExplorer() {
           <div className="relative">
             <button
               onClick={() => setDecisionDropdownOpen(o => !o)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs font-semibold border flex items-center justify-between space-x-2 transition min-w-[140px] ${
+              className={`px-3.5 py-2.5 rounded-md text-xs font-semibold border flex items-center justify-between space-x-2 transition min-w-[140px] ${
                 selectedDecisions.length > 0
-                  ? 'bg-slate-500/15 border-slate-500/40 text-slate-300'
-                  : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
+                  ? 'bg-stone-100 border-stone-300 text-stone-700'
+                  : 'bg-white border-stone-300 text-stone-700 hover:border-stone-300'
               }`}
             >
               <div className="flex items-center space-x-1.5 truncate">
@@ -1222,13 +1222,13 @@ export default function LedgerExplorer() {
             {decisionDropdownOpen && (
               <>
                 <div className="fixed inset-0 z-30" onClick={() => setDecisionDropdownOpen(false)} />
-                <div className="absolute left-0 md:right-0 md:left-auto mt-2 w-56 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-2 z-40 space-y-1 max-h-64 overflow-y-auto">
-                  <div className="flex items-center justify-between px-2 py-1 border-b border-slate-800 text-[10px] text-slate-500 font-mono">
+                <div className="absolute left-0 md:right-0 md:left-auto mt-2 w-56 rounded-md bg-white border border-stone-300 shadow-2xl p-2 z-40 space-y-1 max-h-64 overflow-y-auto">
+                  <div className="flex items-center justify-between px-2 py-1 border-b border-stone-200 text-[10px] text-stone-500 font-mono">
                     <span>Filter Decision Types</span>
                     {selectedDecisions.length > 0 && (
                       <button
                         onClick={() => setSelectedDecisions([])}
-                        className="text-slate-400 hover:underline"
+                        className="text-stone-600 hover:underline"
                       >
                         Reset
                       </button>
@@ -1239,7 +1239,7 @@ export default function LedgerExplorer() {
                     return (
                       <label
                         key={dec}
-                        className="flex items-center space-x-2.5 px-2 py-1.5 rounded-lg text-xs hover:bg-slate-800/80 cursor-pointer text-slate-300"
+                        className="flex items-center space-x-2.5 px-2 py-1.5 rounded-md text-xs hover:bg-stone-100 cursor-pointer text-stone-700"
                       >
                         <input
                           type="checkbox"
@@ -1252,7 +1252,7 @@ export default function LedgerExplorer() {
                               setSelectedDecisions([...selectedDecisions, dec]);
                             }
                           }}
-                          className="rounded border-slate-700 text-slate-500 focus:ring-0 bg-slate-950"
+                          className="rounded border-stone-300 text-stone-500 focus:ring-0 bg-stone-950"
                         />
                         <span className="font-mono text-[11px]">{dec}</span>
                       </label>
@@ -1270,7 +1270,7 @@ export default function LedgerExplorer() {
               setSelectedAgent(e.target.value);
               setPage(1);
             }}
-            className="text-xs bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-300 focus:outline-none focus:border-slate-500 transition cursor-pointer"
+            className="text-xs bg-white border border-stone-300 rounded-md px-3 py-2.5 text-stone-700 focus:outline-none focus:border-stone-900 transition cursor-pointer"
           >
             <option value="ALL">All Agents</option>
             {agentsList.map(a => (
@@ -1287,7 +1287,7 @@ export default function LedgerExplorer() {
               setSelectedRisk(e.target.value);
               setPage(1);
             }}
-            className="text-xs bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-300 focus:outline-none focus:border-slate-500 transition cursor-pointer"
+            className="text-xs bg-white border border-stone-300 rounded-md px-3 py-2.5 text-stone-700 focus:outline-none focus:border-stone-900 transition cursor-pointer"
           >
             <option value="ALL">All Risk Levels</option>
             <option value="LOW">Low Risk</option>
@@ -1303,7 +1303,7 @@ export default function LedgerExplorer() {
               setDateRange(e.target.value);
               setPage(1);
             }}
-            className="text-xs bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-300 focus:outline-none focus:border-slate-500 transition cursor-pointer"
+            className="text-xs bg-white border border-stone-300 rounded-md px-3 py-2.5 text-stone-700 focus:outline-none focus:border-stone-900 transition cursor-pointer"
           >
             <option value="ALL">All Time</option>
             <option value="1H">Last Hour</option>
@@ -1315,9 +1315,9 @@ export default function LedgerExplorer() {
 
         {/* Custom Date Pickers (if CUSTOM selected) */}
         {dateRange === 'CUSTOM' && (
-          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800 text-xs">
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-stone-200 text-xs">
             <div className="flex items-center space-x-2">
-              <span className="text-slate-400 font-mono text-[11px]">From:</span>
+              <span className="text-stone-600 font-mono text-[11px]">From:</span>
               <input
                 type="datetime-local"
                 value={customFrom}
@@ -1325,11 +1325,11 @@ export default function LedgerExplorer() {
                   setCustomFrom(e.target.value);
                   setPage(1);
                 }}
-                className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 text-xs focus:outline-none focus:border-slate-500"
+                className="bg-white border border-stone-300 rounded-lg px-2.5 py-1.5 text-stone-800 text-xs focus:outline-none focus:border-stone-900"
               />
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-slate-400 font-mono text-[11px]">To:</span>
+              <span className="text-stone-600 font-mono text-[11px]">To:</span>
               <input
                 type="datetime-local"
                 value={customTo}
@@ -1337,7 +1337,7 @@ export default function LedgerExplorer() {
                   setCustomTo(e.target.value);
                   setPage(1);
                 }}
-                className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 text-xs focus:outline-none focus:border-slate-500"
+                className="bg-white border border-stone-300 rounded-lg px-2.5 py-1.5 text-stone-800 text-xs focus:outline-none focus:border-stone-900"
               />
             </div>
           </div>
@@ -1345,24 +1345,24 @@ export default function LedgerExplorer() {
 
         {/* Active Filter Chips & Clear All */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80 text-xs">
-            <span className="text-slate-500 text-[11px] font-mono uppercase">Active Filters:</span>
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-stone-200/80 text-xs">
+            <span className="text-stone-500 text-[11px] font-mono uppercase">Active Filters:</span>
 
             {searchQuery && (
-              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[11px]">
+              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-stone-100 text-stone-800 border border-stone-300 text-[11px]">
                 <span>Query: &ldquo;{searchQuery}&rdquo;</span>
-                <button onClick={() => setSearchQuery('')} className="hover:text-slate-400">
+                <button onClick={() => setSearchQuery('')} className="hover:text-stone-600">
                   <X className="w-3 h-3" />
                 </button>
               </span>
             )}
 
             {selectedDecisions.map(d => (
-              <span key={d} className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-500/15 text-slate-300 border border-slate-500/30 text-[11px]">
+              <span key={d} className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-stone-100 text-stone-700 border border-stone-300 text-[11px]">
                 <span>{d}</span>
                 <button
                   onClick={() => setSelectedDecisions(selectedDecisions.filter(x => x !== d))}
-                  className="hover:text-slate-400"
+                  className="hover:text-stone-600"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -1370,27 +1370,27 @@ export default function LedgerExplorer() {
             ))}
 
             {selectedAgent !== 'ALL' && (
-              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[11px]">
+              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-stone-100 text-stone-800 border border-stone-300 text-[11px]">
                 <span>Agent: {selectedAgent}</span>
-                <button onClick={() => setSelectedAgent('ALL')} className="hover:text-slate-400">
+                <button onClick={() => setSelectedAgent('ALL')} className="hover:text-stone-600">
                   <X className="w-3 h-3" />
                 </button>
               </span>
             )}
 
             {selectedRisk !== 'ALL' && (
-              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[11px]">
+              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-stone-100 text-stone-800 border border-stone-300 text-[11px]">
                 <span>Risk: {selectedRisk}</span>
-                <button onClick={() => setSelectedRisk('ALL')} className="hover:text-slate-400">
+                <button onClick={() => setSelectedRisk('ALL')} className="hover:text-stone-600">
                   <X className="w-3 h-3" />
                 </button>
               </span>
             )}
 
             {dateRange !== 'ALL' && (
-              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[11px]">
+              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-stone-100 text-stone-800 border border-stone-300 text-[11px]">
                 <span>Time: {dateRange}</span>
-                <button onClick={() => setDateRange('ALL')} className="hover:text-slate-400">
+                <button onClick={() => setDateRange('ALL')} className="hover:text-stone-600">
                   <X className="w-3 h-3" />
                 </button>
               </span>
@@ -1398,7 +1398,7 @@ export default function LedgerExplorer() {
 
             <button
               onClick={handleClearAllFilters}
-              className="text-[11px] font-semibold text-slate-400 hover:text-slate-300 underline ml-2"
+              className="text-[11px] font-semibold text-stone-600 hover:text-stone-700 underline ml-2"
             >
               Clear all
             </button>
@@ -1408,14 +1408,14 @@ export default function LedgerExplorer() {
 
       {/* 4. Error Banner */}
       {error && (
-        <div className="rounded-xl p-4 bg-slate-500/15 border border-slate-500/30 flex items-center justify-between text-xs text-slate-300">
+        <div className="rounded-md p-4 bg-stone-100 border border-stone-300 flex items-center justify-between text-xs text-stone-800">
           <div className="flex items-center space-x-2">
-            <AlertTriangle className="w-4 h-4 text-slate-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-stone-600 shrink-0" />
             <span>{error}</span>
           </div>
           <button
             onClick={() => loadData()}
-            className="px-3 py-1.5 rounded-lg bg-slate-600 text-white font-semibold hover:bg-slate-500 transition"
+            className="px-3 py-1.5 rounded-md bg-stone-900 text-white font-semibold hover:bg-stone-800 transition"
           >
             Retry
           </button>
@@ -1423,35 +1423,35 @@ export default function LedgerExplorer() {
       )}
 
       {/* 5. Timeline Table */}
-      <div className="glass-panel rounded-2xl overflow-hidden border border-slate-800">
+      <div className="glass-panel rounded-lg overflow-hidden border border-stone-200">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[760px]">
             {/* Sticky Table Header */}
             <thead>
-              <tr className="sticky top-0 bg-[#0c1222]/95 backdrop-blur z-10 border-b border-slate-800 text-[11px] font-mono uppercase text-slate-400">
-                <th className="py-3.5 px-4 font-bold">Time</th>
-                <th className="py-3.5 px-4 font-bold">Event</th>
-                <th className="py-3.5 px-4 font-bold">Agent</th>
-                <th className="py-3.5 px-4 font-bold">Action / Amount</th>
-                <th className="py-3.5 px-4 font-bold">Risk</th>
-                <th className="py-3.5 px-4 font-bold">Decision</th>
-                <th className="py-3.5 px-4 font-bold">Actor</th>
+              <tr className="sticky top-0 bg-white/95 backdrop-blur z-10 border-b border-stone-200 text-[11px] font-mono uppercase text-stone-600">
+                <th className="py-3.5 px-4 font-semibold">Time</th>
+                <th className="py-3.5 px-4 font-semibold">Event</th>
+                <th className="py-3.5 px-4 font-semibold">Agent</th>
+                <th className="py-3.5 px-4 font-semibold">Action / Amount</th>
+                <th className="py-3.5 px-4 font-semibold">Risk</th>
+                <th className="py-3.5 px-4 font-semibold">Decision</th>
+                <th className="py-3.5 px-4 font-semibold">Actor</th>
               </tr>
             </thead>
 
             {/* Table Body */}
-            <tbody className="divide-y divide-slate-800/60 text-xs">
+            <tbody className="divide-y divide-stone-200/60 text-xs">
               {loading ? (
                 // Skeleton Rows
                 Array.from({ length: 6 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="py-4 px-4"><div className="h-3.5 bg-slate-800 rounded w-16" /></td>
-                    <td className="py-4 px-4"><div className="h-5 bg-slate-800 rounded-full w-28" /></td>
-                    <td className="py-4 px-4"><div className="h-3.5 bg-slate-800 rounded w-24" /></td>
-                    <td className="py-4 px-4"><div className="h-3.5 bg-slate-800 rounded w-32" /></td>
-                    <td className="py-4 px-4"><div className="h-4 bg-slate-800 rounded-full w-14" /></td>
-                    <td className="py-4 px-4"><div className="h-4 bg-slate-800 rounded-full w-16" /></td>
-                    <td className="py-4 px-4"><div className="h-3.5 bg-slate-800 rounded w-20" /></td>
+                    <td className="py-4 px-4"><div className="h-3.5 bg-stone-100 rounded w-16" /></td>
+                    <td className="py-4 px-4"><div className="h-5 bg-stone-100 rounded-full w-28" /></td>
+                    <td className="py-4 px-4"><div className="h-3.5 bg-stone-100 rounded w-24" /></td>
+                    <td className="py-4 px-4"><div className="h-3.5 bg-stone-100 rounded w-32" /></td>
+                    <td className="py-4 px-4"><div className="h-4 bg-stone-100 rounded-full w-14" /></td>
+                    <td className="py-4 px-4"><div className="h-4 bg-stone-100 rounded-full w-16" /></td>
+                    <td className="py-4 px-4"><div className="h-3.5 bg-stone-100 rounded w-20" /></td>
                   </tr>
                 ))
               ) : entries.length === 0 ? (
@@ -1459,17 +1459,17 @@ export default function LedgerExplorer() {
                 <tr>
                   <td colSpan={7} className="py-16 text-center">
                     <div className="max-w-xs mx-auto space-y-3">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-center justify-center mx-auto text-slate-400">
+                      <div className="w-12 h-12 rounded-md bg-stone-100 border border-stone-300 flex items-center justify-center mx-auto text-stone-600">
                         <Filter className="w-6 h-6" />
                       </div>
-                      <h3 className="text-sm font-bold text-white">No events match your filters</h3>
-                      <p className="text-xs text-slate-500">
+                      <h3 className="text-sm font-semibold text-stone-900">No events match your filters</h3>
+                      <p className="text-xs text-stone-500">
                         Try adjusting your search terms, date range, or decision type filters to view more activity.
                       </p>
                       {hasActiveFilters && (
                         <button
                           onClick={handleClearAllFilters}
-                          className="px-3.5 py-1.5 rounded-lg bg-slate-600/80 hover:bg-slate-600 text-white text-xs font-semibold transition"
+                          className="px-3.5 py-1.5 rounded-md bg-stone-900 hover:bg-stone-900 text-white text-xs font-semibold transition"
                         >
                           Reset All Filters
                         </button>
@@ -1498,12 +1498,12 @@ export default function LedgerExplorer() {
                     <tr
                       key={entry.id}
                       onClick={() => setSelectedEntry(entry)}
-                      className={`cursor-pointer transition-colors hover:bg-slate-800/50 ${
-                        isSelected ? 'bg-slate-500/10' : isBrokenEntry ? 'bg-slate-500/15' : ''
+                      className={`cursor-pointer transition-colors hover:bg-stone-100 ${
+                        isSelected ? 'bg-stone-100' : isBrokenEntry ? 'bg-stone-100' : ''
                       }`}
                     >
                       {/* Time (relative + full on hover) */}
-                      <td className="py-3 px-4 font-mono text-[11px] text-slate-400 whitespace-nowrap">
+                      <td className="py-3 px-4 font-mono text-[11px] text-stone-600 whitespace-nowrap">
                         <span title={formatFullTime(entry.timestamp)}>
                           {formatRelativeTime(entry.timestamp)}
                         </span>
@@ -1511,25 +1511,25 @@ export default function LedgerExplorer() {
 
                       {/* Event badge with icon */}
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full border text-[11px] font-semibold ${eventBadge.bg} ${eventBadge.color}`}>
+                        <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded border text-[11px] font-semibold ${eventBadge.bg} ${eventBadge.color}`}>
                           <EventIcon className="w-3 h-3 shrink-0" />
                           <span>{entry.event_type}</span>
                         </span>
                       </td>
 
                       {/* Agent */}
-                      <td className="py-3 px-4 whitespace-nowrap font-medium text-slate-200">
+                      <td className="py-3 px-4 whitespace-nowrap font-medium text-stone-800">
                         <div className="flex items-center space-x-1.5">
-                          <Bot className="w-3.5 h-3.5 text-slate-500" />
+                          <Bot className="w-3.5 h-3.5 text-stone-500" />
                           <span>{payload.agent_id || entry.actor}</span>
                         </div>
                       </td>
 
                       {/* Action + amount */}
-                      <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px] text-slate-300">
+                      <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px] text-stone-700">
                         <span>{payload.action || '—'}</span>
                         {payload.amount !== undefined && payload.amount > 0 && (
-                          <span className="ml-2 font-bold text-slate-400 font-sans">
+                          <span className="ml-2 font-semibold text-stone-600 font-sans">
                             {formatCurrency(payload.amount)}
                           </span>
                         )}
@@ -1537,21 +1537,21 @@ export default function LedgerExplorer() {
 
                       {/* Risk */}
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <span className={`inline-block px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold ${riskPill.classes}`}>
+                        <span className={`inline-block px-2 py-0.5 rounded border text-[10px] font-mono font-medium ${riskPill.classes}`}>
                           {riskPill.label}
                         </span>
                       </td>
 
                       {/* Decision */}
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full border text-[10px] font-mono font-bold ${decisionBadge.bg}`}>
+                        <span className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded border text-[10px] font-mono font-medium ${decisionBadge.bg}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${decisionBadge.dot}`} />
                           <span>{decisionBadge.label}</span>
                         </span>
                       </td>
 
                       {/* Actor */}
-                      <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px] text-slate-400">
+                      <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px] text-stone-600">
                         {entry.actor}
                       </td>
                     </tr>
@@ -1563,38 +1563,38 @@ export default function LedgerExplorer() {
         </div>
 
         {/* 6. Pagination Footer */}
-        <div className="px-5 py-3.5 border-t border-slate-800 bg-[#0c1222]/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+        <div className="px-5 py-3.5 border-t border-stone-200 bg-stone-50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-600">
           <div className="font-mono text-[11px]">
             Showing{' '}
-            <span className="text-white font-bold">
+            <span className="text-stone-900 font-semibold">
               {entries.length === 0 ? 0 : (page - 1) * pageSize + 1}
             </span>
             {' '}-{' '}
-            <span className="text-white font-bold">
+            <span className="text-stone-900 font-semibold">
               {Math.min(page * pageSize, totalCount || entries.length)}
             </span>
             {' '}of{' '}
-            <span className="text-white font-bold">{totalCount || entries.length}</span> entries
+            <span className="text-stone-900 font-semibold">{totalCount || entries.length}</span> entries
           </div>
 
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setPage(p => Math.max(p - 1, 1))}
               disabled={page <= 1 || loading}
-              className="px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-600 disabled:opacity-40 text-slate-300 font-medium transition flex items-center space-x-1"
+              className="px-3 py-1.5 rounded-md border border-stone-300 hover:border-stone-300 disabled:opacity-40 text-stone-700 font-medium transition flex items-center space-x-1"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               <span>Previous</span>
             </button>
 
-            <span className="font-mono text-[11px] px-2 text-slate-400">
+            <span className="font-mono text-[11px] px-2 text-stone-600">
               Page {page} of {totalPages}
             </span>
 
             <button
               onClick={() => setPage(p => Math.min(p + 1, totalPages))}
               disabled={page >= totalPages || loading}
-              className="px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-600 disabled:opacity-40 text-slate-300 font-medium transition flex items-center space-x-1"
+              className="px-3 py-1.5 rounded-md border border-stone-300 hover:border-stone-300 disabled:opacity-40 text-stone-700 font-medium transition flex items-center space-x-1"
             >
               <span>Next</span>
               <ChevronRight className="w-3.5 h-3.5" />

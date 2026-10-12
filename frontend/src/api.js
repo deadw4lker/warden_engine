@@ -242,6 +242,10 @@ export const api = {
     return `${API_BASE}/v1/policy/pdf?token=${token || ''}`;
   },
 
+  async getPolicyBundle() {
+    return request('/v1/policy/bundle');
+  },
+
   async uploadPolicyBundle(file) {
     const form = new FormData();
     form.append('file', file);

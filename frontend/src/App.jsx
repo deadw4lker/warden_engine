@@ -58,7 +58,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#090d16]">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#F2EFE9]">
       <Navbar user={user} onLogout={handleLogout} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar

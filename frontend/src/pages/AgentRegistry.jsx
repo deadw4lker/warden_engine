@@ -30,16 +30,16 @@ function formatCurrency(amount) {
 
 function StatusBadge({ status }) {
   const map = {
-    ACTIVE: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
-    active: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
-    PAUSED: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
-    paused: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
-    REVOKED: 'bg-slate-700 text-slate-400 border-slate-600',
-    revoked: 'bg-slate-700 text-slate-400 border-slate-600',
+    ACTIVE: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    active: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    PAUSED: 'bg-amber-50 text-amber-800 border-amber-200',
+    paused: 'bg-amber-50 text-amber-800 border-amber-200',
+    REVOKED: 'bg-red-50 text-red-800 border-red-200',
+    revoked: 'bg-red-50 text-red-800 border-red-200',
   };
   const normalized = (status || '').toUpperCase();
   return (
-    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${map[status] || map[normalized] || 'bg-slate-700 text-slate-400 border-slate-600'}`}>
+    <span className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${map[status] || map[normalized] || 'bg-stone-100 text-stone-700 border-stone-300'}`}>
       {normalized}
     </span>
   );
@@ -83,17 +83,17 @@ function AgentCard({ agent, user, onAction }) {
   };
 
   return (
-    <div className={`glass-panel rounded-xl p-5 transition flex flex-col justify-between ${isPaused ? 'border-slate-500/20 glow-rose' : ''}`}>
+    <div className={`glass-panel rounded-md p-5 transition flex flex-col justify-between ${isPaused ? 'border-stone-200 glow-rose' : ''}`}>
       <div>
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3 min-w-0">
-            <div className={`p-2 rounded-lg ${isActive ? 'bg-slate-500/10 text-slate-400' : 'bg-slate-500/10 text-slate-400'}`}>
+            <div className={`p-2 rounded-md border ${isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : isPaused ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-stone-100 text-stone-600 border-stone-200'}`}>
               {isActive ? <Bot className="w-5 h-5" /> : <ShieldX className="w-5 h-5" />}
             </div>
             <div className="min-w-0">
-              <p className="font-bold text-white truncate text-sm">{agent.name}</p>
-              <p className="text-[10px] text-slate-500 font-mono truncate">{agent.agent_id || agent.id}</p>
+              <p className="font-semibold text-stone-900 truncate text-sm">{agent.name}</p>
+              <p className="text-[10px] text-stone-500 font-mono truncate">{agent.agent_id || agent.id}</p>
             </div>
           </div>
           <StatusBadge status={agent.status} />
@@ -101,22 +101,22 @@ function AgentCard({ agent, user, onAction }) {
 
         {/* Purpose */}
         {agent.purpose && (
-          <p className="text-xs text-slate-400 line-clamp-2 mb-3 leading-relaxed" title={agent.purpose}>
+          <p className="text-xs text-stone-600 line-clamp-2 mb-3 leading-relaxed" title={agent.purpose}>
             {agent.purpose}
           </p>
         )}
 
         {/* Constraints Grid */}
         <div className="grid grid-cols-2 gap-2 mb-3">
-          <div className="bg-slate-900/60 rounded-lg px-3 py-2 border border-slate-800/80">
-            <p className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Max Amount</p>
-            <p className="text-sm font-bold font-mono mt-0.5 text-slate-400">
+          <div className="bg-stone-50 rounded-md px-3 py-2 border border-stone-200/80">
+            <p className="text-[10px] text-stone-500 uppercase font-mono tracking-wider">Max Amount</p>
+            <p className="text-sm font-semibold font-mono mt-0.5 text-stone-600">
               {formatCurrency(agent.max_amount)}
             </p>
           </div>
-          <div className="bg-slate-900/60 rounded-lg px-3 py-2 border border-slate-800/80">
-            <p className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Owner</p>
-            <p className="text-xs font-semibold font-mono mt-1 text-slate-400 truncate flex items-center space-x-1">
+          <div className="bg-stone-50 rounded-md px-3 py-2 border border-stone-200/80">
+            <p className="text-[10px] text-stone-500 uppercase font-mono tracking-wider">Owner</p>
+            <p className="text-xs font-semibold font-mono mt-1 text-stone-600 truncate flex items-center space-x-1">
               <User className="w-3 h-3 shrink-0" />
               <span className="truncate">{agent.owner || 'admin'}</span>
             </p>
@@ -126,17 +126,17 @@ function AgentCard({ agent, user, onAction }) {
         {/* Allowed Data Classes */}
         {agent.allowed_data_classes?.length > 0 && (
           <div className="mb-3">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-mono">Data Classes</p>
+            <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-1 font-mono">Data Classes</p>
             <div className="flex flex-wrap gap-1">
               {agent.allowed_data_classes.map(dc => (
                 <span
                   key={dc}
                   className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                     dc === 'restricted'
-                      ? 'bg-slate-500/10 text-slate-300 border-slate-500/30'
+                      ? 'bg-stone-100 text-stone-700 border-stone-300'
                       : dc === 'confidential'
-                      ? 'bg-slate-500/10 text-slate-300 border-slate-500/30'
-                      : 'bg-slate-800 text-slate-300 border-slate-700'
+                      ? 'bg-stone-100 text-stone-700 border-stone-300'
+                      : 'bg-stone-100 text-stone-700 border-stone-300'
                   }`}
                 >
                   {dc}
@@ -149,15 +149,15 @@ function AgentCard({ agent, user, onAction }) {
         {/* Allowed Actions */}
         {agent.allowed_actions?.length > 0 && (
           <div className="mb-4">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-mono">Allowed Actions</p>
+            <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-1 font-mono">Allowed Actions</p>
             <div className="flex flex-wrap gap-1">
               {agent.allowed_actions.slice(0, 5).map(a => (
-                <span key={a} className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                <span key={a} className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-100 text-stone-600 border border-stone-300">
                   {a}
                 </span>
               ))}
               {agent.allowed_actions.length > 5 && (
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-500">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-stone-100 text-stone-500">
                   +{agent.allowed_actions.length - 5} more
                 </span>
               )}
@@ -168,7 +168,7 @@ function AgentCard({ agent, user, onAction }) {
 
       {/* Control Actions (Pause/Resume) */}
       {canControl && (
-        <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
+        <div className="space-y-1.5 pt-2 border-t border-stone-200/80">
           <div className="flex items-center space-x-2">
             <input
               type="text"
@@ -178,13 +178,13 @@ function AgentCard({ agent, user, onAction }) {
                 setReason(e.target.value);
                 setControlError('');
               }}
-              className="flex-1 text-xs bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-slate-500"
+              className="flex-1 text-xs bg-white border border-stone-300 rounded-lg px-2.5 py-1.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900"
             />
             {isActive ? (
               <button
                 onClick={handlePause}
                 disabled={actionLoading === 'pause'}
-                className="flex items-center space-x-1 px-3 py-1.5 bg-slate-500/15 hover:bg-slate-500/25 text-slate-400 border border-slate-500/30 rounded-lg text-xs font-bold transition disabled:opacity-50 shrink-0"
+                className="flex items-center space-x-1 px-3 py-1.5 bg-white hover:bg-red-50 text-red-800 border border-red-200 rounded-md text-xs font-medium transition disabled:opacity-50 shrink-0"
               >
                 {actionLoading === 'pause' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Pause className="w-3 h-3" />}
                 <span>Pause</span>
@@ -193,7 +193,7 @@ function AgentCard({ agent, user, onAction }) {
               <button
                 onClick={handleResume}
                 disabled={actionLoading === 'resume'}
-                className="flex items-center space-x-1 px-3 py-1.5 bg-slate-500/15 hover:bg-slate-500/25 text-slate-400 border border-slate-500/30 rounded-lg text-xs font-bold transition disabled:opacity-50 shrink-0"
+                className="flex items-center space-x-1 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-md text-xs font-medium transition disabled:opacity-50 shrink-0"
               >
                 {actionLoading === 'resume' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
                 <span>Resume</span>
@@ -201,7 +201,7 @@ function AgentCard({ agent, user, onAction }) {
             ) : null}
           </div>
           {controlError && (
-            <p className="text-[11px] text-slate-400 flex items-center space-x-1">
+            <p className="text-[11px] text-stone-600 flex items-center space-x-1">
               <AlertCircle className="w-3 h-3 shrink-0" />
               <span>{controlError}</span>
             </p>
@@ -329,40 +329,40 @@ function CreateAgentModal({ user, onClose, onCreated }) {
   if (createdApiKey) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-        <div className="glass-panel rounded-2xl w-full max-w-lg p-6 space-y-5 border border-slate-500/40 glow-emerald">
-          <div className="flex items-center space-x-3 text-slate-400">
-            <div className="p-2.5 rounded-xl bg-slate-500/15 border border-slate-500/30">
+        <div className="glass-panel rounded-lg w-full max-w-lg p-6 space-y-5 border border-stone-300 glow-emerald">
+          <div className="flex items-center space-x-3 text-stone-600">
+            <div className="p-2.5 rounded-md bg-stone-100 border border-stone-300">
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Agent Passport Registered</h3>
-              <p className="text-xs text-slate-400">Credentials generated for <span className="text-slate-400 font-mono">{agentId || name}</span></p>
+              <h3 className="text-[14px] font-semibold text-stone-900">Agent Passport Registered</h3>
+              <p className="text-xs text-stone-600">Credentials generated for <span className="text-stone-600 font-mono">{agentId || name}</span></p>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+          <div className="p-4 rounded-md bg-white border border-stone-200 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono text-slate-400 uppercase font-bold tracking-wider">
+              <span className="text-[11px] font-mono text-stone-600 uppercase font-semibold tracking-wider">
                 Generated API Key
               </span>
-              <span className="text-[10px] text-slate-400 font-mono">Save this now!</span>
+              <span className="text-[10px] text-stone-600 font-mono">Save this now!</span>
             </div>
 
-            <div className="flex items-center space-x-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-              <code className="text-xs font-mono text-slate-300 break-all select-all flex-1">
+            <div className="flex items-center space-x-2 bg-stone-950 p-2.5 rounded-md border border-stone-200">
+              <code className="text-xs font-mono text-stone-300 break-all select-all flex-1">
                 {createdApiKey}
               </code>
               <button
                 type="button"
                 onClick={handleCopyApiKey}
-                className="px-3 py-1.5 rounded-md bg-slate-600 hover:bg-slate-500 text-white text-xs font-semibold transition flex items-center space-x-1 shrink-0"
+                className="px-3 py-1.5 rounded-md bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold transition flex items-center space-x-1 shrink-0"
               >
                 {copiedKey ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedKey ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
 
-            <p className="text-[11px] text-slate-400 leading-relaxed pt-1 flex items-start space-x-1.5">
+            <p className="text-[11px] text-stone-600 leading-relaxed pt-1 flex items-start space-x-1.5">
               <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               <span>For security, this secret key is shown <strong>only once</strong> and cannot be retrieved later.</span>
             </p>
@@ -374,7 +374,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
               onCreated();
               onClose();
             }}
-            className="w-full py-2.5 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-xl text-sm transition"
+            className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold rounded-md text-sm transition"
           >
             Done & View Agents
           </button>
@@ -385,26 +385,26 @@ function CreateAgentModal({ user, onClose, onCreated }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
-      <div className="glass-panel rounded-2xl w-full max-w-lg p-6 my-8 max-h-[90vh] overflow-y-auto border border-slate-700 shadow-2xl">
+      <div className="glass-panel rounded-lg w-full max-w-lg p-6 my-8 max-h-[90vh] overflow-y-auto border border-stone-300 shadow-2xl">
         {/* Modal Header */}
-        <div className="flex items-center justify-between mb-5 pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between mb-5 pb-3 border-b border-stone-200">
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 rounded-lg bg-slate-500/10 border border-slate-500/20 text-slate-400">
+            <div className="p-2 rounded-md bg-stone-100 border border-stone-200 text-stone-600">
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Register Agent Passport</h3>
-              <p className="text-xs text-slate-400">Configure pre-execution governance bounds</p>
+              <h3 className="text-base font-semibold text-stone-900">Register Agent Passport</h3>
+              <p className="text-xs text-stone-600">Configure pre-execution governance bounds</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition p-1">
+          <button onClick={onClose} className="text-stone-500 hover:text-stone-900 transition p-1">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* General Error Banner (if not field-specific) */}
         {fieldErrors.general && (
-          <div className="mb-4 flex items-center space-x-2 text-slate-400 text-xs bg-slate-500/10 border border-slate-500/20 rounded-xl px-3.5 py-2.5">
+          <div className="mb-4 flex items-center space-x-2 text-stone-600 text-xs bg-stone-100 border border-stone-200 rounded-md px-3.5 py-2.5">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{fieldErrors.general}</span>
           </div>
@@ -413,20 +413,20 @@ function CreateAgentModal({ user, onClose, onCreated }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Agent Name */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Agent Name <span className="text-slate-400">*</span>
+            <label className="block text-xs font-semibold text-stone-700 mb-1">
+              Agent Name <span className="text-stone-600">*</span>
             </label>
             <input
               type="text"
               value={name}
               onChange={e => handleNameChange(e.target.value)}
               placeholder="e.g. Refund Processor Bot"
-              className={`w-full bg-slate-900 border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none transition ${
-                fieldErrors.name ? 'border-slate-500' : 'border-slate-700 focus:border-slate-500'
+              className={`w-full bg-white border border-stone-300 rounded-md px-3 py-2 text-[13px] text-stone-900 placeholder-stone-400 focus:outline-none transition ${
+                fieldErrors.name ? 'border-stone-500' : 'border-stone-300 focus:border-stone-900'
               }`}
             />
             {fieldErrors.name && (
-              <p className="text-xs text-slate-400 mt-1 flex items-center space-x-1 font-medium">
+              <p className="text-xs text-stone-600 mt-1 flex items-center space-x-1 font-medium">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{fieldErrors.name}</span>
               </p>
@@ -436,8 +436,8 @@ function CreateAgentModal({ user, onClose, onCreated }) {
           {/* Agent ID & Owner */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Agent ID <span className="text-slate-500 font-normal font-mono text-[10px]">(auto or custom)</span>
+              <label className="block text-xs font-semibold text-stone-700 mb-1">
+                Agent ID <span className="text-stone-500 font-normal font-mono text-[10px]">(auto or custom)</span>
               </label>
               <input
                 type="text"
@@ -447,12 +447,12 @@ function CreateAgentModal({ user, onClose, onCreated }) {
                   if (fieldErrors.agent_id) setFieldErrors(prev => ({ ...prev, agent_id: null }));
                 }}
                 placeholder="refund_processor"
-                className={`w-full bg-slate-900 border rounded-xl px-3 py-2 text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none transition ${
-                  fieldErrors.agent_id ? 'border-slate-500' : 'border-slate-700 focus:border-slate-500'
+                className={`w-full bg-white border rounded-md px-3 py-2 text-xs font-mono text-stone-900 placeholder-stone-400 focus:outline-none transition ${
+                  fieldErrors.agent_id ? 'border-stone-500' : 'border-stone-300 focus:border-stone-900'
                 }`}
               />
               {fieldErrors.agent_id && (
-                <p className="text-xs text-slate-400 mt-1 flex items-center space-x-1 font-medium">
+                <p className="text-xs text-stone-600 mt-1 flex items-center space-x-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{fieldErrors.agent_id}</span>
                 </p>
@@ -460,8 +460,8 @@ function CreateAgentModal({ user, onClose, onCreated }) {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Owner <span className="text-slate-400">*</span>
+              <label className="block text-xs font-semibold text-stone-700 mb-1">
+                Owner <span className="text-stone-600">*</span>
               </label>
               <input
                 type="text"
@@ -471,12 +471,12 @@ function CreateAgentModal({ user, onClose, onCreated }) {
                   if (fieldErrors.owner) setFieldErrors(prev => ({ ...prev, owner: null }));
                 }}
                 placeholder="admin"
-                className={`w-full bg-slate-900 border rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none transition ${
-                  fieldErrors.owner ? 'border-slate-500' : 'border-slate-700 focus:border-slate-500'
+                className={`w-full bg-white border rounded-md px-3 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none transition ${
+                  fieldErrors.owner ? 'border-stone-500' : 'border-stone-300 focus:border-stone-900'
                 }`}
               />
               {fieldErrors.owner && (
-                <p className="text-xs text-slate-400 mt-1 flex items-center space-x-1 font-medium">
+                <p className="text-xs text-stone-600 mt-1 flex items-center space-x-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{fieldErrors.owner}</span>
                 </p>
@@ -486,8 +486,8 @@ function CreateAgentModal({ user, onClose, onCreated }) {
 
           {/* Purpose */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Purpose & Role Description <span className="text-slate-400">*</span>
+            <label className="block text-xs font-semibold text-stone-700 mb-1">
+              Purpose & Role Description <span className="text-stone-600">*</span>
             </label>
             <textarea
               rows={2}
@@ -497,12 +497,12 @@ function CreateAgentModal({ user, onClose, onCreated }) {
                 if (fieldErrors.purpose) setFieldErrors(prev => ({ ...prev, purpose: null }));
               }}
               placeholder="e.g. Handles customer refunds and billing adjustments within spending limits"
-              className={`w-full bg-slate-900 border rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:outline-none transition resize-none ${
-                fieldErrors.purpose ? 'border-slate-500' : 'border-slate-700 focus:border-slate-500'
+              className={`w-full bg-white border rounded-md px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none transition resize-none ${
+                fieldErrors.purpose ? 'border-stone-500' : 'border-stone-300 focus:border-stone-900'
               }`}
             />
             {fieldErrors.purpose && (
-              <p className="text-xs text-slate-400 mt-1 flex items-center space-x-1 font-medium">
+              <p className="text-xs text-stone-600 mt-1 flex items-center space-x-1 font-medium">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{fieldErrors.purpose}</span>
               </p>
@@ -511,8 +511,8 @@ function CreateAgentModal({ user, onClose, onCreated }) {
 
           {/* Allowed Actions Tag Input */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Allowed Actions <span className="text-slate-500 font-normal text-[10px]">(tag input)</span>
+            <label className="block text-xs font-semibold text-stone-700 mb-1">
+              Allowed Actions <span className="text-stone-500 font-normal text-[10px]">(tag input)</span>
             </label>
 
             {/* Selected Tags */}
@@ -520,13 +520,13 @@ function CreateAgentModal({ user, onClose, onCreated }) {
               {allowedActions.map(act => (
                 <span
                   key={act}
-                  className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-500/15 text-slate-300 border border-slate-500/30 text-xs font-mono"
+                  className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md bg-stone-100 text-stone-700 border border-stone-300 text-xs font-mono"
                 >
                   <span>{act}</span>
                   <button
                     type="button"
                     onClick={() => removeActionTag(act)}
-                    className="hover:text-slate-400"
+                    className="hover:text-stone-600"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -547,12 +547,12 @@ function CreateAgentModal({ user, onClose, onCreated }) {
                   }
                 }}
                 placeholder="Type action name and press Enter..."
-                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-slate-500"
+                className="flex-1 bg-white border border-stone-300 rounded-md px-3 py-1.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900"
               />
               <button
                 type="button"
                 onClick={() => addActionTag(newActionInput)}
-                className="px-3 py-1.5 rounded-xl border border-slate-700 text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition"
+                className="px-3 py-1.5 rounded-md border border-stone-300 text-xs text-stone-800 hover:text-stone-900 hover:bg-stone-100 transition"
               >
                 + Add
               </button>
@@ -560,7 +560,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
 
             {/* Suggestions */}
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-[10px] text-slate-500 font-mono uppercase">Suggestions:</span>
+              <span className="text-[10px] text-stone-500 font-mono uppercase">Suggestions:</span>
               {SUGGESTED_ACTIONS.map(sug => {
                 const isSelected = allowedActions.includes(sug);
                 return (
@@ -571,8 +571,8 @@ function CreateAgentModal({ user, onClose, onCreated }) {
                     onClick={() => addActionTag(sug)}
                     className={`text-[10px] font-mono px-2 py-0.5 rounded transition ${
                       isSelected
-                        ? 'bg-slate-800 text-slate-600 border border-slate-800 cursor-default'
-                        : 'bg-slate-900 text-slate-400 border border-slate-700 hover:border-slate-500 hover:text-slate-300'
+                        ? 'bg-stone-100 text-stone-600 border border-stone-200 cursor-default'
+                        : 'bg-white text-stone-600 border border-stone-300 hover:border-stone-500 hover:text-stone-700'
                     }`}
                   >
                     +{sug}
@@ -582,7 +582,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
             </div>
 
             {fieldErrors.allowed_actions && (
-              <p className="text-xs text-slate-400 mt-1 flex items-center space-x-1 font-medium">
+              <p className="text-xs text-stone-600 mt-1 flex items-center space-x-1 font-medium">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{fieldErrors.allowed_actions}</span>
               </p>
@@ -591,8 +591,8 @@ function CreateAgentModal({ user, onClose, onCreated }) {
 
           {/* Allowed Data Classes (Checkboxes) */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Allowed Data Classes <span className="text-slate-400">*</span>
+            <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+              Allowed Data Classes <span className="text-stone-600">*</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
               {ALL_DATA_CLASSES.map(dc => {
@@ -600,10 +600,10 @@ function CreateAgentModal({ user, onClose, onCreated }) {
                 return (
                   <label
                     key={dc}
-                    className={`flex items-center space-x-2.5 px-3 py-2 rounded-xl border text-xs cursor-pointer transition ${
+                    className={`flex items-center space-x-2.5 px-3 py-2 rounded-md border text-xs cursor-pointer transition ${
                       checked
-                        ? 'bg-slate-500/10 border-slate-500/40 text-slate-200'
-                        : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-600'
+                        ? 'bg-stone-100 border-stone-300 text-stone-800'
+                        : 'bg-white border-stone-300 text-stone-600 hover:border-stone-300'
                     }`}
                   >
                     <input
@@ -618,7 +618,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
               })}
             </div>
             {fieldErrors.allowed_data_classes && (
-              <p className="text-xs text-slate-400 mt-1 flex items-center space-x-1 font-medium">
+              <p className="text-xs text-stone-600 mt-1 flex items-center space-x-1 font-medium">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{fieldErrors.allowed_data_classes}</span>
               </p>
@@ -627,11 +627,11 @@ function CreateAgentModal({ user, onClose, onCreated }) {
 
           {/* Max Amount */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Max Amount Spending Limit ($) <span className="text-slate-400">*</span>
+            <label className="block text-xs font-semibold text-stone-700 mb-1">
+              Max Amount Spending Limit ($) <span className="text-stone-600">*</span>
             </label>
             <div className="relative">
-              <DollarSign className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <DollarSign className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="number"
                 min="0"
@@ -642,16 +642,16 @@ function CreateAgentModal({ user, onClose, onCreated }) {
                   if (fieldErrors.max_amount) setFieldErrors(prev => ({ ...prev, max_amount: null }));
                 }}
                 placeholder="10000"
-                className={`w-full bg-slate-900 border rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none transition ${
-                  fieldErrors.max_amount ? 'border-slate-500' : 'border-slate-700 focus:border-slate-500'
+                className={`w-full bg-white border rounded-lg pl-9 pr-3 py-2 text-xs font-mono text-stone-900 placeholder-stone-400 focus:outline-none transition ${
+                  fieldErrors.max_amount ? 'border-stone-500' : 'border-stone-300 focus:border-stone-900'
                 }`}
               />
             </div>
-            <p className="text-[10px] text-slate-500 mt-1 font-mono">
+            <p className="text-[10px] text-stone-500 mt-1 font-mono">
               Maximum single-transaction amount before automated human review or kill switch
             </p>
             {fieldErrors.max_amount && (
-              <p className="text-xs text-slate-400 mt-1 flex items-center space-x-1 font-medium">
+              <p className="text-xs text-stone-600 mt-1 flex items-center space-x-1 font-medium">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{fieldErrors.max_amount}</span>
               </p>
@@ -659,19 +659,19 @@ function CreateAgentModal({ user, onClose, onCreated }) {
           </div>
 
           {/* Form Actions */}
-          <div className="flex space-x-3 pt-3 border-t border-slate-800">
+          <div className="flex space-x-3 pt-3 border-t border-stone-200">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 py-2.5 border border-slate-700 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:border-slate-600 transition"
+              className="flex-1 py-2.5 border border-stone-300 rounded-md text-xs font-semibold text-stone-600 hover:text-stone-900 hover:border-stone-300 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 bg-slate-600 hover:bg-slate-500 disabled:opacity-50 text-white font-semibold rounded-xl text-xs transition flex items-center justify-center space-x-2"
+              className="flex-1 py-2.5 bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white font-semibold rounded-md text-xs transition flex items-center justify-center space-x-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>{loading ? 'Registering...' : 'Register Agent'}</span>
@@ -713,18 +713,18 @@ export default function AgentRegistry({ user }) {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-extrabold text-white">Agent Passports</h2>
-          <p className="text-slate-500 text-sm mt-0.5">Cryptographic passports, blast radius bounds & kill switches</p>
+          <h2 className="text-xl font-semibold text-stone-900">Agent Passports</h2>
+          <p className="text-stone-500 text-sm mt-0.5">Cryptographic passports, blast radius bounds & kill switches</p>
         </div>
         <div className="flex items-center space-x-3">
-          <button onClick={load} className="p-2 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 transition">
+          <button onClick={load} className="p-2 rounded-md border border-stone-300 text-stone-600 hover:text-stone-900 hover:border-stone-300 transition">
             <RefreshCw className="w-4 h-4" />
           </button>
           {canCreate && (
             <button
               id="create-agent-btn"
               onClick={() => setShowCreate(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-lg text-sm transition"
+              className="flex items-center space-x-2 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-semibold rounded-md text-sm transition"
             >
               <Plus className="w-4 h-4" />
               <span>Register Agent</span>
@@ -739,10 +739,10 @@ export default function AgentRegistry({ user }) {
           <button
             key={s}
             onClick={() => setFilter(s)}
-            className={`px-3 py-1.5 text-xs font-mono font-bold rounded-lg border transition ${
+            className={`px-3 py-1.5 text-xs font-mono font-medium rounded-md border transition ${
               filter === s
-                ? 'bg-slate-500/15 text-slate-400 border-slate-500/30'
-                : 'text-slate-500 border-slate-800 hover:border-slate-700 hover:text-slate-400'
+                ? 'bg-stone-900 text-white border-stone-900'
+                : 'text-stone-500 border-stone-200 hover:border-stone-300 hover:text-stone-600'
             }`}
           >
             {s} {s === 'ALL' ? `(${agents.length})` : `(${agents.filter(a => (a.status || '').toUpperCase() === s).length})`}
@@ -753,13 +753,13 @@ export default function AgentRegistry({ user }) {
       {/* Agents Grid */}
       {loading ? (
         <div className="flex items-center justify-center h-40">
-          <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+          <Loader2 className="w-8 h-8 text-stone-600 animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-slate-500 glass-panel rounded-2xl">
-          <Bot className="w-10 h-10 mx-auto mb-3 opacity-40 text-slate-400" />
-          <p className="text-sm font-semibold text-slate-300">No agents registered</p>
-          <p className="text-xs text-slate-500 mt-1">Register a new agent passport to enable governed execution.</p>
+        <div className="text-center py-16 text-stone-500 glass-panel rounded-lg">
+          <Bot className="w-10 h-10 mx-auto mb-3 opacity-40 text-stone-600" />
+          <p className="text-sm font-semibold text-stone-700">No agents registered</p>
+          <p className="text-xs text-stone-500 mt-1">Register a new agent passport to enable governed execution.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

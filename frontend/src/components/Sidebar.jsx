@@ -4,34 +4,28 @@ import {
   Bot,
   CheckSquare,
   FileCheck2,
-  FileSpreadsheet,
   ShieldCheck,
-  AlertOctagon,
-  Sparkles
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, onSelectTab, pendingApprovalsCount = 0 }) {
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'agents', label: 'Agent Passports', icon: Bot },
+    { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
+    { id: 'agents', label: 'Agents', icon: Bot },
     {
       id: 'approvals',
-      label: 'Approvals Queue',
+      label: 'Approvals',
       icon: CheckSquare,
       badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : null,
-      badgeColor: 'bg-slate-700 text-slate-100 border-slate-500'
     },
-    { id: 'ledger', label: 'Activity Logs', icon: FileCheck2 },
-    { id: 'policies', label: 'Policies & OPA', icon: ShieldCheck },
-    { id: 'reports', label: 'Audit Reports', icon: FileSpreadsheet },
+    { id: 'ledger', label: 'Activity log', icon: FileCheck2 },
+    { id: 'policies', label: 'Policies', icon: ShieldCheck },
+    { id: 'reports', label: 'Reports', icon: FileSpreadsheet },
   ];
 
   return (
-    <aside className="w-64 border-r border-slate-800 bg-[#0c1222] flex flex-col justify-between p-4 shrink-0">
-      <div className="space-y-1">
-        <div className="px-3 py-2 text-[11px] font-bold tracking-wider text-slate-500 uppercase font-mono">
-          Governance Controls
-        </div>
+    <aside className="w-52 border-r border-[#E6E0D3] bg-white flex flex-col justify-between py-4 px-3 shrink-0">
+      <nav className="space-y-0.5">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -39,34 +33,31 @@ export default function Sidebar({ activeTab, onSelectTab, pendingApprovalsCount 
             <button
               key={item.id}
               onClick={() => onSelectTab(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+              className={`w-full flex items-center justify-between px-2.5 py-2 rounded-md text-[13px] transition ${
                 isActive
-                  ? 'bg-slate-100 text-slate-900 font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-stone-900 text-white font-medium'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
               }`}
             >
-              <div className="flex items-center space-x-3">
-                <Icon className={`w-4 h-4 ${isActive ? 'text-slate-900' : 'text-slate-500'}`} />
+              <div className="flex items-center space-x-2.5">
+                <Icon className="w-4 h-4" />
                 <span>{item.label}</span>
               </div>
               {item.badge && (
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-bold ${item.badgeColor}`}>
+                <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded leading-none ${
+                  isActive ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'
+                }`}>
                   {item.badge}
                 </span>
               )}
             </button>
           );
         })}
-      </div>
+      </nav>
 
-      {/* Control Layer Footer Card */}
-      <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs space-y-2">
-        <div className="flex items-center space-x-2 text-slate-200 font-semibold">
-          <AlertOctagon className="w-4 h-4 text-slate-400" />
-          <span>Fail-Closed Engine</span>
-        </div>
-        <p className="text-slate-400 text-[11px] leading-relaxed">
-          Unregistered actions, policy violations, or SLA expirations are permanently denied at runtime.
+      <div className="px-2.5 pt-4 mt-4 border-t border-stone-200">
+        <p className="text-[11px] text-stone-500 leading-relaxed">
+          Fail-closed: unregistered actions are denied by default.
         </p>
       </div>
     </aside>
