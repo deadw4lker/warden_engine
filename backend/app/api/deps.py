@@ -47,6 +47,34 @@ def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Secur
         "created_at": row["created_at"]
     }
 
+def get_user_from_token(token: Optional[str]) -> Optional[dict]:
+    """Validate a raw JWT and return the user, or None. Used by browser
+    downloads (anchor clicks can't set headers, so the token travels as
+    ?token= instead). Same checks as the header path."""
+    if not token:
+        return None
+    payload = decode_access_token(token)
+    if not payload:
+        return None
+    username = payload.get("sub")
+    if not username:
+        return None
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, username, email, full_name, role, created_at FROM users WHERE username = ?", (username,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        return None
+    return {
+        "id": row["id"],
+        "username": row["username"],
+        "email": row["email"],
+        "full_name": row["full_name"],
+        "role": row["role"],
+        "created_at": row["created_at"]
+    }
+
 def require_roles(allowed_roles: List[str]):
     """Enforce Role-Based Access Control (RBAC)."""
     def role_checker(current_user: dict = Depends(get_current_user)) -> dict:

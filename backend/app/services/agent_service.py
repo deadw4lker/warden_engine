@@ -235,3 +235,28 @@ def verify_agent_api_key(agent_id: str, api_key: str) -> bool:
     expected_hash = agent["api_key_hash"]
     given_hash = hash_api_key(api_key)
     return secrets.compare_digest(expected_hash, given_hash)
+
+def rotate_agent_key(agent_id: str, actor: str = "admin") -> Dict[str, Any]:
+    """Generate a fresh API key for an agent passport. The old key stops
+    working immediately. Returns the raw key ONCE — it cannot be recovered."""
+    agent = get_agent_by_id(agent_id)
+    if not agent:
+        raise ValueError(f"Agent '{agent_id}' not found")
+
+    new_key = generate_api_key()
+    now = datetime.utcnow().isoformat() + "Z"
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE agent_passports SET api_key_hash = ?, api_key_prefix = ?, updated_at = ? WHERE agent_id = ?",
+        (hash_api_key(new_key), new_key[:8] + "...", now, agent_id),
+    )
+    conn.commit()
+    conn.close()
+
+    append_ledger_entry(
+        event_type="AGENT_KEY_ROTATED",
+        actor=actor,
+        payload={"agent_id": agent_id, "key_prefix": new_key[:8] + "..."},
+    )
+    return {"agent_id": agent_id, "api_key": new_key, "api_key_prefix": new_key[:8] + "..."}

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 class ActionRequest(BaseModel):
@@ -20,6 +20,9 @@ class ActionDecisionResponse(BaseModel):
     risk_breakdown: Optional[Dict[str, Any]] = None
     evidence_pack: Optional[Dict[str, Any]] = None
     ledger_hash: Optional[str] = None
+    # Four-layer checklist (PDF sections 2-5): [{layer, check, result, detail}]
+    # Shown on the dashboard scanner per request. Additive only.
+    layers: Optional[List[Dict[str, Any]]] = None
 
 class ActionExecutionReport(BaseModel):
     agent_id: str

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { api, setCurrentUser } from '../api';
-import { Shield, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import Logo from '../components/Logo';
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, onBack, onSignup }) {
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('demo123');
   const [fieldErrors, setFieldErrors] = useState({});
@@ -55,11 +56,8 @@ export default function Login({ onLogin }) {
     <div className="min-h-screen bg-[#F2EFE9] flex items-center justify-center p-4">
       <div className="w-full max-w-[380px]">
         <div className="flex items-center space-x-2.5 mb-6">
-          <div className="w-8 h-8 rounded-md bg-stone-900 flex items-center justify-center text-white">
-            <Shield className="w-4 h-4" />
-          </div>
+          <Logo height={30} />
           <div>
-            <h1 className="text-[15px] font-bold tracking-tight text-stone-900 leading-none">Warden</h1>
             <p className="text-[12px] text-stone-500 mt-0.5">Agent governance console</p>
           </div>
         </div>
@@ -144,6 +142,18 @@ export default function Login({ onLogin }) {
         <p className="text-center text-[11px] text-stone-400 mt-4">
           Pre-execution control &amp; audit trail
         </p>
+        <div className="flex items-center justify-center gap-4 mt-3 text-[12px]">
+          {onSignup && (
+            <button onClick={onSignup} className="text-stone-900 font-semibold hover:underline">
+              Create workspace
+            </button>
+          )}
+          {onBack && (
+            <button onClick={onBack} className="text-stone-500 hover:text-stone-900 transition">
+              Back to home
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

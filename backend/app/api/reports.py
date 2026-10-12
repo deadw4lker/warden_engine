@@ -4,11 +4,57 @@ import io
 import json
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Query, Response, Security, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials
 from app.db import get_connection
-from app.api.deps import get_current_user
+from app.api.deps import security, get_user_from_token
 
 router = APIRouter(prefix="", tags=["Reports"])
+
+
+def _resolve_report_user(
+    credentials: Optional[HTTPAuthorizationCredentials],
+    token: Optional[str],
+) -> dict:
+    """Auth for downloads: Authorization header first (API clients),
+    ?token= fallback (browser anchor clicks can't set headers)."""
+    user = None
+    if credentials:
+        user = get_user_from_token(credentials.credentials)
+    if user is None:
+        user = get_user_from_token(token)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid credentials. Please log in again.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+
+
+def _decode_row(r) -> dict:
+    """Full log row: every column decoded, nothing summarized away."""
+    try:
+        payload = json.loads(r["payload"])
+    except Exception:
+        payload = {"raw": r["payload"]}
+    layers = payload.get("layers") if isinstance(payload.get("layers"), list) else []
+    return {
+        "id": r["id"],
+        "timestamp": r["timestamp"],
+        "event_type": r["event_type"],
+        "actor": r["actor"],
+        "decision": payload.get("decision", ""),
+        "action": payload.get("action", ""),
+        "agent_id": payload.get("agent_id", ""),
+        "amount": payload.get("amount", ""),
+        "layers": "; ".join(
+            f"{e.get('layer')}:{e.get('result')}" for e in layers if isinstance(e, dict)
+        ),
+        "payload": payload,
+        "prev_hash": r["prev_hash"],
+        "hash": r["hash"],
+    }
 
 @router.get("/reports/audit")
 @router.get("/v1/reports/audit")
@@ -16,12 +62,15 @@ def generate_audit_report(
     from_date: Optional[str] = Query(default=None, alias="from"),
     to_date: Optional[str] = Query(default=None, alias="to"),
     format: str = Query(default="csv", pattern="^(csv|json|html|pdf)$"),
-    user: dict = Depends(get_current_user)
+    token: Optional[str] = Query(default=None),
+    credentials: Optional[HTTPAuthorizationCredentials] = Security(security),
 ):
     """
     Generate verifiable audit trail report for regulatory and compliance review.
     Supports CSV, JSON, and formatted printable audit report.
+    Every ledger row is exported in full: decoded columns plus complete payload.
     """
+    user = _resolve_report_user(credentials, token)
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -41,21 +90,12 @@ def generate_audit_report(
 
     query += " ORDER BY id ASC"
     cursor.execute(query, params)
-    rows = cursor.fetchall()
+    rows = [_decode_row(r) for r in cursor.fetchall()]
     conn.close()
 
     if format == "json":
-        data = [{
-            "id": r["id"],
-            "timestamp": r["timestamp"],
-            "event_type": r["event_type"],
-            "actor": r["actor"],
-            "payload": json.loads(r["payload"]),
-            "prev_hash": r["prev_hash"],
-            "hash": r["hash"]
-        } for r in rows]
         return Response(
-            content=json.dumps(data, indent=2),
+            content=json.dumps(rows, indent=2),
             media_type="application/json",
             headers={"Content-Disposition": f"attachment; filename=warden_audit_report_{datetime.utcnow().strftime('%Y%m%d')}.json"}
         )
@@ -63,14 +103,21 @@ def generate_audit_report(
     if format == "csv":
         output = io.StringIO()
         writer = csv.writer(output)
-        writer.writerow(["ID", "Timestamp (UTC)", "Event Type", "Actor", "Payload Summary", "Previous Hash", "Entry Hash (SHA-256)"])
+        writer.writerow(["ID", "Timestamp (UTC)", "Event Type", "Actor", "Decision",
+                         "Action", "Agent", "Amount", "Layers (L:result)",
+                         "Full Payload (JSON)", "Previous Hash", "Entry Hash (SHA-256)"])
         for r in rows:
             writer.writerow([
                 r["id"],
                 r["timestamp"],
                 r["event_type"],
                 r["actor"],
-                r["payload"].replace("\n", " "),
+                r["decision"],
+                r["action"],
+                r["agent_id"],
+                r["amount"],
+                r["layers"],
+                json.dumps(r["payload"]).replace("\n", " "),
                 r["prev_hash"],
                 r["hash"]
             ])
@@ -108,22 +155,21 @@ def generate_audit_report(
     <thead>
       <tr>
         <th style="width: 50px;">ID</th>
-        <th style="width: 170px;">Timestamp</th>
-        <th style="width: 150px;">Event Type</th>
+        <th style="width: 200px;">Timestamp / Event / Layers</th>
         <th style="width: 120px;">Actor</th>
-        <th>Payload Detail</th>
+        <th>Payload Detail (full)</th>
         <th style="width: 200px;">Cryptographic Hash</th>
       </tr>
     </thead>
     <tbody>
 """
     for r in rows:
-        payload_pretty = json.dumps(json.loads(r["payload"]), indent=2)
+        payload_pretty = json.dumps(r["payload"], indent=2)
+        layers_pretty = r["layers"] or "—"
         html += f"""
       <tr>
         <td><strong>#{r['id']}</strong></td>
-        <td>{r['timestamp']}</td>
-        <td><span class="badge">{r['event_type']}</span></td>
+        <td>{r['timestamp']}<br><span class="badge">{r['event_type']}</span><br>{layers_pretty}</td>
         <td>{r['actor']}</td>
         <td><pre style="margin:0; font-size:11px;">{payload_pretty}</pre></td>
         <td class="hash">{r['hash']}</td>

@@ -1,4 +1,9 @@
-export const API_BASE = 'http://127.0.0.1:8000';
+// Render/local aware: baked VITE_API_BASE wins (public backend URL),
+// otherwise same-machine dev default. Accepts bare hosts too.
+const _rawBase = (import.meta.env.VITE_API_BASE || '').trim().replace(/\/$/, '');
+export const API_BASE = _rawBase
+  ? (_rawBase.startsWith('http') ? _rawBase : `https://${_rawBase}`)
+  : 'http://127.0.0.1:8000';
 
 export function getToken() {
   return localStorage.getItem('warden_jwt');
@@ -109,6 +114,16 @@ export const api = {
 
   async getMe() {
     return request('/auth/me');
+  },
+
+  async signup({ username, email, password, full_name, company, role }) {
+    const data = await request('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ username, email, password, full_name, company, role })
+    });
+    setToken(data.access_token);
+    setCurrentUser(data.user);
+    return data;
   },
 
   logout() {
@@ -280,5 +295,60 @@ export const api = {
       throw new ApiError(data.detail || `Upload failed (${res.status})`, res.status, {}, data.detail);
     }
     return data;
+  },
+
+  // Self-serve agent onboarding (Connect page: Register tab)
+  async selfRegisterAgent({ name, purpose, agent_id, allowed_actions, allowed_data_classes, max_amount }) {
+    return request('/v1/agents/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, purpose, agent_id, allowed_actions, allowed_data_classes, max_amount })
+    });
+  },
+
+  async rotateAgentKey(agentId) {
+    return request(`/v1/agents/${agentId}/rotate-key`, { method: 'POST' });
+  },
+
+  async getAgentKeyInfo(agentId) {
+    return request(`/v1/agents/${agentId}/key-info`);
+  },
+
+  // Provider connections (Connect page: Bot / LLM tab)
+  async getProviders() {
+    return request('/v1/connections/providers');
+  },
+
+  async getConnections() {
+    return request('/v1/connections');
+  },
+
+  async createConnection({ name, provider, api_key, model, base_url, system_prompt, allowed_actions, allowed_data_classes, max_amount }) {
+    return request('/v1/connections', {
+      method: 'POST',
+      body: JSON.stringify({ name, provider, api_key, model, base_url, system_prompt, allowed_actions, allowed_data_classes, max_amount })
+    });
+  },
+
+  async testConnection(id) {
+    return request(`/v1/connections/${id}/test`, { method: 'POST' });
+  },
+
+  async runConnection(id, task) {
+    return request(`/v1/connections/${id}/run`, {
+      method: 'POST',
+      body: JSON.stringify({ task })
+    });
+  },
+
+  async pauseConnection(id) {
+    return request(`/v1/connections/${id}/pause`, { method: 'POST' });
+  },
+
+  async resumeConnection(id) {
+    return request(`/v1/connections/${id}/resume`, { method: 'POST' });
+  },
+
+  async revokeConnection(id) {
+    return request(`/v1/connections/${id}`, { method: 'DELETE' });
   }
 };

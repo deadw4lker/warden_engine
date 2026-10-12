@@ -37,3 +37,15 @@ class AgentPassportResponse(BaseModel):
 
 class AgentStatusActionRequest(BaseModel):
     reason: Optional[str] = "Manual state change via console"
+
+class SelfRegisterRequest(BaseModel):
+    """Self-serve agent onboarding: any authenticated console user (e.g. a
+    business that just signed up) can register their own agent. Guardrails
+    (safe actions only, capped budget, caller forced as owner) are enforced
+    in the endpoint — no admin rights needed."""
+    name: str
+    purpose: str
+    agent_id: Optional[str] = None
+    allowed_actions: List[str] = Field(default_factory=list)
+    allowed_data_classes: List[str] = Field(default_factory=list)
+    max_amount: float = 0.0

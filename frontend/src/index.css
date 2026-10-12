@@ -51,3 +51,35 @@
 .glow-sky {
   box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06);
 }
+
+/* Submarine radar sweep (light theme, subtle) */
+@keyframes sonar-sweep-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes sonar-blip-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.sonar-sweep-light {
+  background: conic-gradient(
+    from 0deg,
+    rgba(28, 25, 23, 0.10) 0deg,
+    rgba(28, 25, 23, 0.045) 45deg,
+    rgba(28, 25, 23, 0.015) 90deg,
+    transparent 130deg
+  );
+  animation: sonar-sweep-rotate 5s linear infinite;
+}
+.sonar-blip-light {
+  animation: sonar-blip-soft 2.4s ease-in-out infinite;
+}
+
+/* Layer-by-layer reveal for the radar detail list */
+@keyframes layer-reveal {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.layer-reveal {
+  animation: layer-reveal 0.45s ease both;
+}

@@ -1,21 +1,15 @@
 import React from 'react';
-import { Shield, LogOut, User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
+import Logo from './Logo';
 
 export default function Navbar({ user, onLogout }) {
   return (
     <header className="h-14 border-b border-[#E6E0D3] bg-white px-5 flex items-center justify-between shrink-0">
       <div className="flex items-center space-x-2.5">
-        <div className="w-7 h-7 rounded-md bg-stone-900 flex items-center justify-center text-white">
-          <Shield className="w-4 h-4" />
-        </div>
-        <div className="flex items-baseline space-x-2">
-          <span className="font-bold text-[15px] tracking-tight text-stone-900">
-            Warden
-          </span>
-          <span className="text-[11px] text-stone-500 hidden sm:inline">
-            Agent governance
-          </span>
-        </div>
+        <Logo height={26} />
+        <span className="text-[11px] text-stone-500 hidden sm:inline">
+          Agent governance
+        </span>
       </div>
 
       <div className="flex items-center space-x-4">

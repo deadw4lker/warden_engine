@@ -1,0 +1,38 @@
+# Render Blueprint — WARDEN engine + console (free tier).
+# Deploy: Render Dashboard → New → Blueprint → connect this repo.
+# Secrets (JWT_SECRET auto-generated; nothing secret is baked in code).
+services:
+  - type: web
+    name: warden-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    plan: free
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: OPA_FALLBACK_ENABLED
+        value: "true"
+      - key: DEFAULT_APPROVAL_SLA_SECONDS
+        value: "120"
+      - key: ESCALATION_CHECK_INTERVAL_SECONDS
+        value: "5"
+      # Fernet keys can't be auto-generated (must be 32-byte urlsafe-b64):
+      # paste the KEY_ENCRYPTION_SECRET from the deploy handoff.
+      - key: KEY_ENCRYPTION_SECRET
+        sync: false
+
+  - type: static
+    name: warden-console
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    # Backend host is wired dynamically; the app prepends https:// (see api.js).
+    envVars:
+      - key: VITE_API_BASE
+        fromService:
+          name: warden-backend
+          type: web
+          property: host

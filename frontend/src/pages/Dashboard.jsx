@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { api } from '../api';
 import {
   Bot, CheckSquare, FileCheck2, ShieldX,
   Activity, AlertTriangle, Loader2, RefreshCw
 } from 'lucide-react';
 import { computeDashboardStats, formatCounterValue } from '../utils/dashboardStats';
+import SubmarineScanner from '../components/SubmarineScanner';
 
 function StatCard({ icon: Icon, label, value, loading, sub }) {
   return (
@@ -49,6 +50,8 @@ export default function Dashboard({ user, onSelectTab }) {
   const [ledgerEntries, setLedgerEntries] = useState([]);
   const [ledgerTotal, setLedgerTotal] = useState(0);
   const [approvals, setApprovals] = useState([]);
+  const [blockedEntries, setBlockedEntries] = useState([]);
+  const [allowedEntries, setAllowedEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshedAt, setLastRefreshedAt] = useState(null);
@@ -58,10 +61,12 @@ export default function Dashboard({ user, onSelectTab }) {
   const loadData = useCallback(async (isManual = false) => {
     if (isManual) setRefreshing(true);
     try {
-      const [agentsRes, ledgerRes, approvalsRes] = await Promise.all([
+      const [agentsRes, ledgerRes, approvalsRes, blockedRes, allowedRes] = await Promise.all([
         api.getAgents(),
         api.getLedger(10),
         api.getApprovals(),
+        api.getLedger({ event_type: 'ACTION_BLOCKED', limit: 20 }).catch(() => ({ items: [] })),
+        api.getLedger({ event_type: 'ACTION_ALLOWED', limit: 20 }).catch(() => ({ items: [] })),
       ]);
 
       if (!isMountedRef.current) return;
@@ -72,11 +77,30 @@ export default function Dashboard({ user, onSelectTab }) {
         ? ledgerRes.total
         : (Array.isArray(ledgerRes) ? ledgerRes.length : safeLedgerItems.length);
       const safeApprovals = Array.isArray(approvalsRes) ? approvalsRes : (approvalsRes?.items ?? []);
+      const safeBlocked = Array.isArray(blockedRes) ? blockedRes : (blockedRes?.items ?? []);
+      const safeAllowed = Array.isArray(allowedRes) ? allowedRes : (allowedRes?.items ?? []);
+
+      const toContact = (prefix, status) => (e) => {
+        const p = e.payload || {};
+        return {
+          id: `${prefix}-${e.id}`,
+          action: p.action || e.event_type,
+          agent_id: p.agent_id || e.actor,
+          amount: p.amount || 0,
+          created_at: e.timestamp,
+          status,
+          decision_id: p.decision_id,
+          evidence_pack: { layers: Array.isArray(p.layers) ? p.layers : [] },
+        };
+      };
 
       setAgents(safeAgents);
       setLedgerEntries(safeLedgerItems);
       setLedgerTotal(safeLedgerTotal);
       setApprovals(safeApprovals);
+      // Normalize denials + auto-approvals into scanner contacts.
+      setBlockedEntries(safeBlocked.map(toContact('denied', 'BLOCKED')));
+      setAllowedEntries(safeAllowed.map(toContact('allowed', 'ALLOWED')));
       setLastRefreshedAt(new Date());
     } catch (e) {
       console.error('[WARDEN Dashboard] Error loading dashboard data:', e);
@@ -114,6 +138,11 @@ export default function Dashboard({ user, onSelectTab }) {
   }, [loadData]);
 
   const stats = computeDashboardStats(agents, { total: ledgerTotal, items: ledgerEntries }, approvals);
+
+  const pendingList = useMemo(() => approvals.filter((a) => {
+    const s = String(a?.status || '').toUpperCase();
+    return s === 'PENDING' || s === 'PENDING_APPROVAL' || s === 'ESCALATED' || s === 'APPROVAL_REQUESTED';
+  }), [approvals]);
 
   if (loading) {
     return (
@@ -176,6 +205,8 @@ export default function Dashboard({ user, onSelectTab }) {
           sub="Hash-chained"
         />
       </div>
+
+      <SubmarineScanner items={pendingList} blocked={blockedEntries} allowed={allowedEntries} onOpenQueue={() => onSelectTab('approvals')} onOpenLedger={() => onSelectTab('ledger')} />
 
       {stats.pendingApprovals > 0 && (
         <div className="flex items-center space-x-3 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">

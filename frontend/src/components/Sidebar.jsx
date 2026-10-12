@@ -6,12 +6,14 @@ import {
   FileCheck2,
   ShieldCheck,
   FileSpreadsheet,
+  Plug,
 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, onSelectTab, pendingApprovalsCount = 0 }) {
   const navItems = [
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
     { id: 'agents', label: 'Agents', icon: Bot },
+    { id: 'connect', label: 'Connect', icon: Plug },
     {
       id: 'approvals',
       label: 'Approvals',
