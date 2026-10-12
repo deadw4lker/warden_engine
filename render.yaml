@@ -25,7 +25,7 @@ services:
       - key: KEY_ENCRYPTION_SECRET
         sync: false
 
-  - type: static
+  - type: static_site
     name: warden-console
     buildCommand: cd frontend && npm ci && npm run build
     staticPublishPath: ./frontend/dist
