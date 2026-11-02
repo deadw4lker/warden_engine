@@ -70,7 +70,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#F4F7FA]">
+    <div className="flex h-screen overflow-hidden bg-[#F4F7FA]">
       <Navbar
         user={user}
         onLogout={handleLogout}
@@ -78,7 +78,7 @@ export default function App() {
         onSelectTab={setActiveTab}
         pendingApprovalsCount={pendingCount}
       />
-      <main className="min-h-0 flex-1 overflow-y-auto">
+      <main className="flex-1 min-w-0 overflow-y-auto bg-[#F4F7FA]">
         {pages[activeTab] || pages.dashboard}
       </main>
     </div>

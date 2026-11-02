@@ -9,17 +9,7 @@ default decision := "BLOCK"
 default reason := "Denied by default security policy"
 
 # MAIN EVALUATION RULE
-# Layer 0 guard signature (input.guard, fed by Qwen3Guard) gates the decision
-# FIRST when present:
-#   unsafe         -> hard block (defense-in-depth backstop; L0 normally
-#                     short-circuits this before the pipeline reaches L4)
-#   controversial  -> human review (PENDING_APPROVAL -> SLA escalation queue)
-# Legacy semantics (PDF sections 2-5) remain authoritative otherwise.
-decision_result := "BLOCK" if {
-	input.guard.safety == "unsafe"
-} else := "PENDING_APPROVAL" if {
-	input.guard.safety == "controversial"
-} else := "ALLOW" if {
+decision_result := "ALLOW" if {
 	not is_restricted_action
 	check_refund_limit
 	check_replacement_limits
@@ -39,23 +29,6 @@ allow if decision_result == "ALLOW"
 
 reason := "Action permitted by policy" if decision_result == "ALLOW"
 
-reason := "Restricted action blocked" if {
-	decision_result == "BLOCK"
-	is_restricted_action
-}
+reason := "Action exceeds automated limits; human approval required" if decision_result == "PENDING_APPROVAL"
 
-reason := "Blocked by content guard signature (Qwen3Guard: unsafe)" if {
-	decision_result == "BLOCK"
-	not is_restricted_action
-	input.guard.safety == "unsafe"
-}
-
-reason := "Content guard requested human review (Qwen3Guard: controversial)" if {
-	decision_result == "PENDING_APPROVAL"
-	input.guard.safety == "controversial"
-}
-
-reason := "Action exceeds automated limits; human approval required" if {
-	decision_result == "PENDING_APPROVAL"
-	input.guard.safety != "controversial"
-}
+reason := "Restricted action blocked" if is_restricted_action
