@@ -72,6 +72,10 @@ coverage.xml
 *.log
 *.db-journal
 
+# Large model binaries (do not commit)
+models/*.gguf
+models/*.bin
+
 # Editor and OS files
 .DS_Store
 Thumbs.db

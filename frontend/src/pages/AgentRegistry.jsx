@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api';
 import {
-  Bot, Plus, Pause, Play, Loader2, AlertCircle,
+  UserRound, Plus, Pause, Play, Loader2, AlertCircle,
   CheckCircle2, ShieldX, RefreshCw, X, Shield,
   DollarSign, Database, Tag, Copy, Check, Info, User
 } from 'lucide-react';
+import { humanizeAction, humanizeAgentStatus, humanizeDataClass } from '../utils/userText';
 
 const ALL_DATA_CLASSES = ['public', 'internal', 'confidential', 'restricted'];
 const SUGGESTED_ACTIONS = [
@@ -40,7 +41,7 @@ function StatusBadge({ status }) {
   const normalized = (status || '').toUpperCase();
   return (
     <span className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${map[status] || map[normalized] || 'bg-stone-100 text-stone-700 border-stone-300'}`}>
-      {normalized}
+      {humanizeAgentStatus(status)}
     </span>
   );
 }
@@ -83,13 +84,13 @@ function AgentCard({ agent, user, onAction }) {
   };
 
   return (
-    <div className={`glass-panel rounded-md p-5 transition flex flex-col justify-between ${isPaused ? 'border-stone-200 glow-rose' : ''}`}>
+    <div className={`glass-panel hover-lift rounded-md p-5 flex flex-col justify-between ${isPaused ? 'border-stone-200 glow-rose' : ''}`}>
       <div>
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3 min-w-0">
             <div className={`p-2 rounded-md border ${isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : isPaused ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-stone-100 text-stone-600 border-stone-200'}`}>
-              {isActive ? <Bot className="w-5 h-5" /> : <ShieldX className="w-5 h-5" />}
+              {isActive ? <UserRound className="w-5 h-5" /> : <ShieldX className="w-5 h-5" />}
             </div>
             <div className="min-w-0">
               <p className="font-semibold text-stone-900 truncate text-sm">{agent.name}</p>
@@ -109,13 +110,13 @@ function AgentCard({ agent, user, onAction }) {
         {/* Constraints Grid */}
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div className="bg-stone-50 rounded-md px-3 py-2 border border-stone-200/80">
-            <p className="text-[10px] text-stone-500 uppercase font-mono tracking-wider">Max Amount</p>
+            <p className="text-[10px] text-stone-500 uppercase tracking-wider">Spending limit per request</p>
             <p className="text-sm font-semibold font-mono mt-0.5 text-stone-600">
               {formatCurrency(agent.max_amount)}
             </p>
           </div>
           <div className="bg-stone-50 rounded-md px-3 py-2 border border-stone-200/80">
-            <p className="text-[10px] text-stone-500 uppercase font-mono tracking-wider">Owner</p>
+            <p className="text-[10px] text-stone-500 uppercase tracking-wider">Responsible person</p>
             <p className="text-xs font-semibold font-mono mt-1 text-stone-600 truncate flex items-center space-x-1">
               <User className="w-3 h-3 shrink-0" />
               <span className="truncate">{agent.owner || 'admin'}</span>
@@ -126,7 +127,7 @@ function AgentCard({ agent, user, onAction }) {
         {/* Allowed Data Classes */}
         {agent.allowed_data_classes?.length > 0 && (
           <div className="mb-3">
-            <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-1 font-mono">Data Classes</p>
+            <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">Information this agent can use</p>
             <div className="flex flex-wrap gap-1">
               {agent.allowed_data_classes.map(dc => (
                 <span
@@ -139,7 +140,7 @@ function AgentCard({ agent, user, onAction }) {
                       : 'bg-stone-100 text-stone-700 border-stone-300'
                   }`}
                 >
-                  {dc}
+                  {humanizeDataClass(dc)}
                 </span>
               ))}
             </div>
@@ -149,11 +150,11 @@ function AgentCard({ agent, user, onAction }) {
         {/* Allowed Actions */}
         {agent.allowed_actions?.length > 0 && (
           <div className="mb-4">
-            <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-1 font-mono">Allowed Actions</p>
+            <p className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">What this agent can do</p>
             <div className="flex flex-wrap gap-1">
               {agent.allowed_actions.slice(0, 5).map(a => (
                 <span key={a} className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-100 text-stone-600 border border-stone-300">
-                  {a}
+                  {humanizeAction(a)}
                 </span>
               ))}
               {agent.allowed_actions.length > 5 && (
@@ -335,7 +336,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-[14px] font-semibold text-stone-900">Agent Passport Registered</h3>
+              <h3 className="text-[14px] font-semibold text-stone-900">Agent added</h3>
               <p className="text-xs text-stone-600">Credentials generated for <span className="text-stone-600 font-mono">{agentId || name}</span></p>
             </div>
           </div>
@@ -343,9 +344,9 @@ function CreateAgentModal({ user, onClose, onCreated }) {
           <div className="p-4 rounded-md bg-white border border-stone-200 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-mono text-stone-600 uppercase font-semibold tracking-wider">
-                Generated API Key
+                Agent access key
               </span>
-              <span className="text-[10px] text-stone-600 font-mono">Save this now!</span>
+              <span className="text-[10px] text-stone-600">Copy this now</span>
             </div>
 
             <div className="flex items-center space-x-2 bg-stone-950 p-2.5 rounded-md border border-stone-200">
@@ -393,8 +394,8 @@ function CreateAgentModal({ user, onClose, onCreated }) {
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-stone-900">Register Agent Passport</h3>
-              <p className="text-xs text-stone-600">Configure pre-execution governance bounds</p>
+              <h3 className="text-base font-semibold text-stone-900">Add an agent</h3>
+              <p className="text-xs text-stone-600">Choose what it can do and how much it can spend.</p>
             </div>
           </div>
           <button onClick={onClose} className="text-stone-500 hover:text-stone-900 transition p-1">
@@ -420,7 +421,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
               type="text"
               value={name}
               onChange={e => handleNameChange(e.target.value)}
-              placeholder="e.g. Refund Processor Bot"
+              placeholder="e.g. Refund Assistant"
               className={`w-full bg-white border border-stone-300 rounded-md px-3 py-2 text-[13px] text-stone-900 placeholder-stone-400 focus:outline-none transition ${
                 fieldErrors.name ? 'border-stone-500' : 'border-stone-300 focus:border-stone-900'
               }`}
@@ -437,7 +438,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-stone-700 mb-1">
-                Agent ID <span className="text-stone-500 font-normal font-mono text-[10px]">(auto or custom)</span>
+                Connection name <span className="text-stone-500 font-normal text-[10px]">(optional)</span>
               </label>
               <input
                 type="text"
@@ -461,7 +462,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
 
             <div>
               <label className="block text-xs font-semibold text-stone-700 mb-1">
-                Owner <span className="text-stone-600">*</span>
+                Responsible person <span className="text-stone-600">*</span>
               </label>
               <input
                 type="text"
@@ -487,7 +488,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
           {/* Purpose */}
           <div>
             <label className="block text-xs font-semibold text-stone-700 mb-1">
-              Purpose & Role Description <span className="text-stone-600">*</span>
+              What does this agent do? <span className="text-stone-600">*</span>
             </label>
             <textarea
               rows={2}
@@ -512,7 +513,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
           {/* Allowed Actions Tag Input */}
           <div>
             <label className="block text-xs font-semibold text-stone-700 mb-1">
-              Allowed Actions <span className="text-stone-500 font-normal text-[10px]">(tag input)</span>
+              What can it do? <span className="text-stone-500 font-normal text-[10px]">(add each task)</span>
             </label>
 
             {/* Selected Tags */}
@@ -522,7 +523,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
                   key={act}
                   className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md bg-stone-100 text-stone-700 border border-stone-300 text-xs font-mono"
                 >
-                  <span>{act}</span>
+                  <span>{humanizeAction(act)}</span>
                   <button
                     type="button"
                     onClick={() => removeActionTag(act)}
@@ -560,7 +561,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
 
             {/* Suggestions */}
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-[10px] text-stone-500 font-mono uppercase">Suggestions:</span>
+              <span className="text-[10px] text-stone-500 uppercase">Common tasks:</span>
               {SUGGESTED_ACTIONS.map(sug => {
                 const isSelected = allowedActions.includes(sug);
                 return (
@@ -575,7 +576,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
                         : 'bg-white text-stone-600 border border-stone-300 hover:border-stone-500 hover:text-stone-700'
                     }`}
                   >
-                    +{sug}
+                  + {humanizeAction(sug)}
                   </button>
                 );
               })}
@@ -592,7 +593,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
           {/* Allowed Data Classes (Checkboxes) */}
           <div>
             <label className="block text-xs font-semibold text-stone-700 mb-1.5">
-              Allowed Data Classes <span className="text-stone-600">*</span>
+              What information can it use? <span className="text-stone-600">*</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
               {ALL_DATA_CLASSES.map(dc => {
@@ -612,7 +613,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
                       onChange={() => toggleDataClass(dc)}
                       className="rounded border-stone-300 text-stone-500 focus:ring-0 bg-white"
                     />
-                    <span className="font-mono text-xs capitalize">{dc}</span>
+                    <span className="text-xs">{humanizeDataClass(dc)}</span>
                   </label>
                 );
               })}
@@ -628,7 +629,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
           {/* Max Amount */}
           <div>
             <label className="block text-xs font-semibold text-stone-700 mb-1">
-              Max Amount Spending Limit ($) <span className="text-stone-600">*</span>
+              Spending limit per request ($) <span className="text-stone-600">*</span>
             </label>
             <div className="relative">
               <DollarSign className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -648,7 +649,7 @@ function CreateAgentModal({ user, onClose, onCreated }) {
               />
             </div>
             <p className="text-[10px] text-stone-500 mt-1 font-mono">
-              Maximum single-transaction amount before automated human review or kill switch
+              Requests above this amount will need a person to review them.
             </p>
             {fieldErrors.max_amount && (
               <p className="text-xs text-stone-600 mt-1 flex items-center space-x-1 font-medium">
@@ -709,12 +710,12 @@ export default function AgentRegistry({ user }) {
     : agents.filter(a => (a.status || '').toUpperCase() === filter);
 
   return (
-    <div className="p-6 space-y-5 max-w-7xl mx-auto">
+    <div className="w-full min-h-full p-6 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-stone-900">Agent Passports</h2>
-          <p className="text-stone-500 text-sm mt-0.5">Cryptographic passports, blast radius bounds & kill switches</p>
+          <h2 className="text-xl font-semibold text-stone-900">Agents</h2>
+          <p className="text-stone-500 text-sm mt-0.5">Manage what each agent can do and pause access when needed.</p>
         </div>
         <div className="flex items-center space-x-3">
           <button onClick={load} className="p-2 rounded-md border border-stone-300 text-stone-600 hover:text-stone-900 hover:border-stone-300 transition">
@@ -727,7 +728,7 @@ export default function AgentRegistry({ user }) {
               className="flex items-center space-x-2 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-semibold rounded-md text-sm transition"
             >
               <Plus className="w-4 h-4" />
-              <span>Register Agent</span>
+              <span>Add agent</span>
             </button>
           )}
         </div>
@@ -757,9 +758,9 @@ export default function AgentRegistry({ user }) {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-stone-500 glass-panel rounded-lg">
-          <Bot className="w-10 h-10 mx-auto mb-3 opacity-40 text-stone-600" />
+          <UserRound className="w-10 h-10 mx-auto mb-3 opacity-40 text-stone-600" />
           <p className="text-sm font-semibold text-stone-700">No agents registered</p>
-          <p className="text-xs text-stone-500 mt-1">Register a new agent passport to enable governed execution.</p>
+          <p className="text-xs text-stone-500 mt-1">Add an agent to set its access and spending limits.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

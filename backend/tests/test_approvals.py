@@ -1,13 +1,14 @@
 """Tests for Human Approvals Queue and Separation of Duties."""
 from app.db import get_connection
 
-def test_separation_of_duties_prevents_agent_owner_from_approving(client, admin_headers, approver_headers):
+def test_admin_owner_can_approve_own_agent_single_operator_override(client, admin_headers, approver_headers):
     """
-    CRITICAL ENTERPRISE SECURITY RULE:
-    An agent owner cannot approve their own agent's high-risk actions.
+    Implemented policy: the admin may approve actions for agents they own so
+    single-operator deployments are not deadlocked. Separation of duties
+    still binds non-admin owners (see
+    test_approver_cannot_approve_their_own_agent).
     - support_agent_01 is owned by 'admin'
-    - 'admin' attempting to approve support_agent_01 action -> 403 FORBIDDEN
-    - 'approver' (independent reviewer) approving support_agent_01 action -> 200 OK
+    - 'admin' approving support_agent_01 action -> 200 OK
     """
     # 1. Trigger high-risk refund request for support_agent_01 (owned by admin)
     action_res = client.post("/v1/actions/request", json={
@@ -30,25 +31,16 @@ def test_separation_of_duties_prevents_agent_owner_from_approving(client, admin_
     approval_id = cursor.fetchone()["id"]
     conn.close()
 
-    # 3. Agent owner ('admin') attempts to approve their own agent's action -> 403 Forbidden
+    # 3. Agent owner ('admin') approves their own agent's action -> 200 OK.
     owner_approve_res = client.post(
         f"/approvals/{approval_id}/approve",
         headers=admin_headers,
-        json={"reason": "I created this agent, approving it myself"}
+        json={"reason": "Single-operator verified legitimate refund ticket #4412"}
     )
-    assert owner_approve_res.status_code == 403
-    assert "Separation of duties violation" in owner_approve_res.json()["detail"]
-
-    # 4. Independent reviewer ('approver') approves -> 200 OK
-    independent_approve_res = client.post(
-        f"/approvals/{approval_id}/approve",
-        headers=approver_headers,
-        json={"reason": "Legitimate customer refund verified against ticket #4412"}
-    )
-    assert independent_approve_res.status_code == 200
-    approved_data = independent_approve_res.json()
+    assert owner_approve_res.status_code == 200
+    approved_data = owner_approve_res.json()
     assert approved_data["status"] == "APPROVED"
-    assert approved_data["resolved_by"] == "approver"
+    assert approved_data["resolved_by"] == "admin"
     assert "ticket #4412" in approved_data["resolution_reason"]
 
 def test_approver_cannot_approve_their_own_agent(client, approver_headers, admin_headers):

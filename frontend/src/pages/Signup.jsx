@@ -62,7 +62,7 @@ export default function Signup({ onLogin, onSignupDone, onBack }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2EFE9] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F4F7FA] flex items-center justify-center p-4">
       <div className="w-full max-w-[440px]">
         <button onClick={onBack} className="flex items-center justify-center mx-auto mb-6" aria-label="WARDEN home">
           <Logo height={30} />

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../api';
 import {
   FileSpreadsheet, Download, FileText, Table2,
-  Loader2, CheckCircle2, Link2, Scale, BarChart3, Timer, Bot
+  Loader2, CheckCircle2, Link2, Scale, BarChart3, Timer, UsersRound
 } from 'lucide-react';
 
 export default function Reports() {
@@ -32,37 +32,36 @@ export default function Reports() {
   };
 
   const formats = [
-    { id: 'csv', label: 'CSV', icon: Table2, desc: 'Comma-separated, Excel-compatible', color: 'text-stone-600' },
-    { id: 'json', label: 'JSON', icon: FileText, desc: 'Machine-readable, full metadata', color: 'text-stone-600' },
+    { id: 'csv', label: 'Spreadsheet (CSV)', icon: Table2, desc: 'Open with Excel or another spreadsheet app', color: 'text-stone-600' },
+    { id: 'json', label: 'Developer file (JSON)', icon: FileText, desc: 'Includes detailed information for technical tools', color: 'text-stone-600' },
   ];
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl mx-auto">
+    <div className="w-full min-h-full p-6 space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-stone-900">Audit Reports</h2>
-        <p className="text-stone-500 text-sm mt-0.5">Export full cryptographic audit trail for compliance</p>
+        <h2 className="text-xl font-semibold text-stone-900">Activity reports</h2>
+        <p className="text-stone-500 text-sm mt-0.5">Download a record of agent activity and review decisions.</p>
       </div>
 
       {/* Report info */}
       <div className="glass-panel rounded-md p-6 space-y-4">
         <h3 className="font-bold text-stone-900 flex items-center space-x-2">
           <FileSpreadsheet className="w-5 h-5 text-stone-600" />
-          <span>Comprehensive Audit Report</span>
+          <span>Complete activity report</span>
         </h3>
         <p className="text-sm text-stone-600 leading-relaxed">
-          Exports the complete governance audit trail — all agent actions, policy decisions,
-          approval workflows, SLA escalations, and ledger integrity checkpoints.
-          Suitable for SOC 2, ISO 27001, and internal compliance reviews.
+          Download a record of actions, company rule checks, requests for review, and changes to agent access.
+          You can share it with your team or use it during an internal review.
         </p>
 
         <div className="grid grid-cols-3 gap-3 py-2">
           {[
-            { label: 'All Ledger Events', Icon: Link2 },
-            { label: 'Policy Decisions', Icon: Scale },
-            { label: 'Approval Chain', Icon: CheckCircle2 },
-            { label: 'Risk Scores', Icon: BarChart3 },
-            { label: 'SLA Violations', Icon: Timer },
-            { label: 'Agent Passports', Icon: Bot },
+            { label: 'Activity history', Icon: Link2 },
+            { label: 'Company rule checks', Icon: Scale },
+            { label: 'Review decisions', Icon: CheckCircle2 },
+            { label: 'Possible impact', Icon: BarChart3 },
+            { label: 'Overdue reviews', Icon: Timer },
+            { label: 'Agent changes', Icon: UsersRound },
           ].map(({ label, Icon }) => (
             <div key={label} className="bg-stone-50 rounded-md px-3 py-2.5 flex items-center space-x-2">
               <Icon className="w-4 h-4 text-stone-600 shrink-0" />
@@ -73,7 +72,7 @@ export default function Reports() {
 
         {/* Format selection */}
         <div>
-          <p className="text-xs font-semibold text-stone-600 uppercase tracking-wider mb-3">Export Format</p>
+          <p className="text-xs font-semibold text-stone-600 uppercase tracking-wider mb-3">Choose a file type</p>
           <div className="grid grid-cols-2 gap-3">
             {formats.map(f => {
               const Icon = f.icon;
@@ -121,9 +120,9 @@ export default function Reports() {
         )}
       </div>
 
-      {/* Compliance badges */}
       <div className="glass-panel rounded-md p-5">
-        <h3 className="text-sm font-bold text-stone-900 mb-4">Compliance Coverage</h3>
+        <h3 className="text-sm font-bold text-stone-900 mb-2">Helpful for reviews</h3>
+        <p className="text-xs text-stone-500 mb-4">These standards may come up in security and privacy reviews. This report supports your review; it does not certify compliance.</p>
         <div className="flex flex-wrap gap-2">
           {['SOC 2 Type II', 'ISO 27001', 'GDPR Article 22', 'EU AI Act', 'NIST AI RMF', 'PCI DSS'].map(label => (
             <span key={label} className="px-3 py-1.5 rounded-md bg-white border border-stone-300 text-xs text-stone-600 font-mono">

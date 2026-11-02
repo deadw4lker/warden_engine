@@ -29,7 +29,37 @@ services:
       - "run"
       - "--server"
       - "--log-level=info"
-      - "/policies/warden.rego"
+      - "/policies"
+
+  # Layer 0 content guard: Qwen3Guard-Gen-0.6B (CPU, llama.cpp, OpenAI-compatible)
+  # Model file must be fetched first: scripts/fetch_guard_model.sh
+  guard:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    container_name: warden_guard
+    restart: unless-stopped
+    volumes:
+      - ./models:/models:ro
+    command:
+      - "--model"
+      - "/models/Qwen3Guard-Gen-0.6B.Q8_0.gguf"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8322"
+      - "--threads"
+      - "${GUARD_THREADS:-8}"
+      - "--ctx-size"
+      - "8192"
+    environment:
+      - LLAMA_SERVER_THREADS=${GUARD_THREADS:-8}
+    ports:
+      - "8322:8322"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8322/health || wget -qO- http://localhost:8322/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
 
   backend:
     build:
@@ -44,12 +74,20 @@ services:
       JWT_SECRET: warden_super_secret_demo_key_2026_change_in_prod
       DEFAULT_APPROVAL_SLA_SECONDS: "120"
       ESCALATION_CHECK_INTERVAL_SECONDS: "5"
+      # Layer 0 content guard (Qwen3Guard). Set QWEN_GUARD_ENABLED=false to
+      # run L1-L4 only, then also remove the `guard` service above.
+      QWEN_GUARD_URL: http://guard:8322
+      QWEN_GUARD_ENABLED: "true"
+      QWEN_GUARD_FAIL_CLOSED: "true"
+      QWEN_GUARD_MODEL: guard
     ports:
       - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
       opa:
+        condition: service_started
+      guard:
         condition: service_started
 
   frontend:

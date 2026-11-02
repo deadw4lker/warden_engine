@@ -4,9 +4,10 @@ import {
   ShieldCheck, ShieldAlert, RefreshCw, Loader2, Search,
   Download, Filter, X, ChevronRight, Copy, Check, ExternalLink,
   AlertTriangle, Zap, Ban, Clock, CheckCircle2, XCircle, ArrowUpRight,
-  Bot, Hash, User, Calendar, SlidersHorizontal, Terminal, Info,
+  UserRound, Hash, User, Calendar, SlidersHorizontal, Terminal, Info,
   ChevronLeft, FileText, ChevronDown, Wrench, Shield, CheckSquare
 } from 'lucide-react';
+import { humanizeAction, humanizeDecision, humanizeEvent, humanizeRisk } from '../utils/userText';
 
 // --- Utility Helpers ---
 
@@ -89,7 +90,7 @@ export function getEntryExplanation(entry) {
     return `Pending Human Approval: action '${p.action || 'unknown'}' requires sign-off`;
   }
   if (entry.event_type === 'GENESIS') {
-    return 'Tamper-evident cryptographically chained ledger initialized';
+    return 'Protected activity history started.';
   }
   return `${entry.event_type} event recorded by ${entry.actor}`;
 }
@@ -341,9 +342,9 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
             </span>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-base font-semibold text-stone-900">{entry.event_type}</h3>
+                <h3 className="text-base font-semibold text-stone-900">{humanizeEvent(entry.event_type)}</h3>
                 <span className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${decisionBadge.bg}`}>
-                  {decisionBadge.label}
+                  {humanizeDecision(decisionBadge.label)}
                 </span>
               </div>
               <p className="text-xs text-stone-600 font-mono mt-0.5" title={formatFullTime(entry.timestamp)}>
@@ -366,7 +367,7 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
           <div className="rounded-md p-4 bg-stone-50 border border-stone-200 space-y-1.5">
             <div className="text-[11px] font-semibold tracking-wider text-stone-600 uppercase font-mono flex items-center space-x-1.5">
               <Info className="w-3.5 h-3.5 text-stone-600" />
-              <span>Explanation</span>
+              <span>What happened</span>
             </div>
             <p className="text-sm text-stone-800 leading-relaxed font-medium">
               {explanation}
@@ -396,14 +397,14 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
             <div className="p-3.5 rounded-md bg-stone-50 border border-stone-200">
               <span className="text-[10px] text-stone-500 uppercase font-mono">Agent</span>
               <p className="text-sm font-semibold text-stone-800 mt-0.5 flex items-center space-x-1.5">
-                <Bot className="w-4 h-4 text-stone-600 shrink-0" />
+                <UserRound className="w-4 h-4 text-stone-600 shrink-0" />
                 <span className="truncate">{payload.agent_id || entry.actor}</span>
               </p>
             </div>
             <div className="p-3.5 rounded-md bg-stone-50 border border-stone-200">
-              <span className="text-[10px] text-stone-500 uppercase font-mono">Action & Amount</span>
+              <span className="text-[10px] text-stone-500 uppercase">Task and amount</span>
               <p className="text-sm font-semibold text-stone-800 mt-0.5 font-mono truncate">
-                {payload.action || '—'}
+                {payload.action ? humanizeAction(payload.action) : '—'}
                 {payload.amount !== undefined && payload.amount > 0 && (
                   <span className="ml-1.5 text-stone-600">({formatCurrency(payload.amount)})</span>
                 )}
@@ -415,10 +416,10 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
           <div className="p-4 rounded-md bg-stone-50 border border-stone-200 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold tracking-wider text-stone-600 uppercase font-mono">
-                Risk Score Breakdown
+                Possible impact
               </span>
               <span className="text-xs font-mono font-medium text-stone-600">
-                Score: {risk.score !== undefined ? risk.score : '0.00'} · {risk.risk_level}
+                {humanizeRisk(risk.risk_level)} · Score {risk.score !== undefined ? risk.score : '0.00'}
               </span>
             </div>
 
@@ -458,7 +459,7 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
               {/* Irreversibility */}
               <div>
                 <div className="flex justify-between text-stone-600 mb-1">
-                  <span>Irreversibility</span>
+                  <span>How hard it is to undo</span>
                   <span className="font-mono text-stone-700">
                     {Math.round((risk.irreversibility_factor || 0) * 100)}% ({payload.reversibility || 'partially'})
                   </span>
@@ -478,7 +479,7 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold tracking-wider text-stone-600 uppercase font-mono flex items-center space-x-1.5">
                 <ShieldCheck className="w-4 h-4 text-stone-600" />
-                <span>Cryptographic Chain Proof</span>
+                <span>Record protection check</span>
               </span>
               {proofLoading ? (
                 <Loader2 className="w-3.5 h-3.5 text-stone-500 animate-spin" />
@@ -488,7 +489,7 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
                     ? 'bg-stone-900 text-white border-stone-900'
                     : 'bg-stone-100 text-stone-600 border-stone-300'
                 }`}>
-                  {proof.is_valid ? 'Chain Link Valid' : 'Integrity Broken'}
+                  {proof.is_valid ? 'History is intact' : 'A record may have changed'}
                 </span>
               )}
             </div>
@@ -497,7 +498,7 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
               {/* Current Hash */}
               <div className="p-2.5 rounded-md bg-stone-950 border border-stone-200 flex items-center justify-between">
                 <div className="min-w-0 mr-2">
-                  <span className="text-[10px] text-stone-500 uppercase font-mono block">Entry Hash (SHA-256)</span>
+                  <span className="text-[10px] text-stone-500 uppercase block">This record’s protection code</span>
                   <code className="text-[11px] text-stone-400 font-mono truncate block" title={entry.hash}>
                     {entry.hash?.slice(0, 20)}...{entry.hash?.slice(-8)}
                   </code>
@@ -514,7 +515,7 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
               {/* Prev Hash */}
               <div className="p-2.5 rounded-md bg-stone-950 border border-stone-200 flex items-center justify-between">
                 <div className="min-w-0 mr-2">
-                  <span className="text-[10px] text-stone-500 uppercase font-mono block">Previous Hash (Parent Link)</span>
+                  <span className="text-[10px] text-stone-500 uppercase block">Previous record’s protection code</span>
                   <code className="text-[11px] text-stone-400 font-mono truncate block" title={entry.prev_hash}>
                     {entry.prev_hash === '0'.repeat(64)
                       ? '00000000000000000000 (GENESIS)'
@@ -551,7 +552,7 @@ function LogDetailDrawer({ entry, previousEntry, onClose, onCopyHash }) {
                 className="flex items-center space-x-2 text-xs font-semibold text-stone-700 hover:text-stone-900 transition"
               >
                 <ChevronDown className={`w-4 h-4 transition-transform ${evidenceOpen ? 'rotate-180' : ''}`} />
-                <span>Evidence Pack & Payload JSON</span>
+                <span>Technical details for your support team</span>
               </button>
               <button
                 onClick={() => handleCopy(JSON.stringify(evidencePack, null, 2), 'evidence')}
@@ -977,13 +978,13 @@ export default function LedgerExplorer() {
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto min-h-full">
+    <div className="w-full min-h-full p-6 space-y-6">
       {/* 1. Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-stone-900 tracking-tight">Activity Logs</h1>
+          <h1 className="text-xl font-semibold text-stone-900 tracking-tight">Activity log</h1>
           <p className="text-stone-600 text-sm mt-0.5">
-            Every AI action decision, tamper-evident
+            See what agents did, what WARDEN allowed, and what needs review.
           </p>
         </div>
 
@@ -1013,10 +1014,10 @@ export default function LedgerExplorer() {
                 {verifying
                   ? 'Verifying...'
                   : verifyResult && verifyResult.valid
-                  ? `Chain valid · ${verifyResult.total_entries} entries`
+                  ? `History checked · ${verifyResult.total_entries} records`
                   : verifyResult && !verifyResult.valid
-                  ? `Broken at entry #${verifyResult.broken_entry_id ?? verifyResult.broken_index}`
-                  : 'Verify Chain'}
+                  ? `A record may have changed · #${verifyResult.broken_entry_id ?? verifyResult.broken_index}`
+                  : 'Check activity history'}
               </span>
             </button>
           </div>
@@ -1047,7 +1048,7 @@ export default function LedgerExplorer() {
             className="px-3 py-2 rounded-md text-xs font-semibold bg-white border border-stone-300 text-stone-800 hover:bg-stone-100 hover:border-stone-300 transition flex items-center space-x-2 disabled:opacity-50"
           >
             <Download className="w-4 h-4 text-stone-600" />
-            <span>Export CSV</span>
+            <span>Download spreadsheet</span>
           </button>
 
           {/* Dev Tools Dropdown (Visible only if DEV_MODE) */}
@@ -1058,7 +1059,7 @@ export default function LedgerExplorer() {
                 className="px-3 py-2 rounded-md text-xs font-semibold bg-stone-100 border border-stone-300 text-stone-700 hover:bg-stone-100 transition flex items-center space-x-1.5"
               >
                 <Wrench className="w-3.5 h-3.5" />
-                <span>Dev Tools</span>
+                <span>Advanced tools</span>
                 <ChevronDown className="w-3.5 h-3.5 ml-0.5" />
               </button>
 
@@ -1074,7 +1075,7 @@ export default function LedgerExplorer() {
                       className="w-full text-left px-3 py-2 text-xs text-stone-800 hover:bg-stone-800/15 flex items-center space-x-2 transition"
                     >
                       <AlertTriangle className="w-3.5 h-3.5 text-stone-600" />
-                      <span>Simulate Tamper</span>
+                      <span>Test record protection</span>
                     </button>
                   </div>
                 </>
@@ -1089,24 +1090,24 @@ export default function LedgerExplorer() {
         {/* Total Events */}
         <button
           onClick={() => handleSummaryCardClick('ALL')}
-          className={`glass-panel p-4 rounded-md text-left transition hover:border-stone-300 ${
+          className={`glass-panel hover-lift p-4 rounded-md text-left transition hover:border-stone-300 ${
             isCardActive('ALL') ? 'border-stone-500/60 ring-1 ring-stone-500/40 bg-stone-50' : ''
           }`}
         >
           <div className="flex items-center justify-between text-stone-600 mb-1">
-            <span className="text-[11px] font-mono uppercase font-semibold tracking-wider">Total Events</span>
+            <span className="text-[11px] uppercase font-semibold tracking-wider">Activity records</span>
             <Hash className="w-4 h-4 text-stone-500" />
           </div>
           <p className="text-xl font-semibold text-stone-900 mt-1">
             {summaryMetrics.total}
           </p>
-          <span className="text-[10px] text-stone-500 mt-0.5 block">Recorded in chain</span>
+          <span className="text-[10px] text-stone-500 mt-0.5 block">Saved in protected history</span>
         </button>
 
         {/* Allowed */}
         <button
           onClick={() => handleSummaryCardClick('ALLOWED')}
-          className={`glass-panel p-4 rounded-md text-left transition hover:border-stone-300 ${
+          className={`glass-panel hover-lift p-4 rounded-md text-left transition hover:border-stone-300 ${
             isCardActive('ALLOWED') ? 'border-stone-500/60 ring-1 ring-stone-500/40 bg-stone-50' : ''
           }`}
         >
@@ -1123,24 +1124,24 @@ export default function LedgerExplorer() {
         {/* Pending Approval */}
         <button
           onClick={() => handleSummaryCardClick('PENDING')}
-          className={`glass-panel p-4 rounded-md text-left transition hover:border-stone-300 ${
+          className={`glass-panel hover-lift p-4 rounded-md text-left transition hover:border-stone-300 ${
             isCardActive('PENDING') ? 'border-stone-500/60 ring-1 ring-stone-500/40 bg-stone-50' : ''
           }`}
         >
           <div className="flex items-center justify-between text-stone-600 mb-1">
-            <span className="text-[11px] font-mono uppercase font-semibold tracking-wider text-stone-600">Pending Review</span>
+            <span className="text-[11px] uppercase font-semibold tracking-wider text-stone-600">Needs review</span>
             <Clock className="w-4 h-4 text-stone-600" />
           </div>
           <p className="text-xl font-semibold text-stone-600 mt-1">
             {summaryMetrics.pending}
           </p>
-          <span className="text-[10px] text-stone-500 mt-0.5 block">Awaiting sign-off</span>
+          <span className="text-[10px] text-stone-500 mt-0.5 block">Waiting for a person</span>
         </button>
 
         {/* Blocked */}
         <button
           onClick={() => handleSummaryCardClick('BLOCKED')}
-          className={`glass-panel p-4 rounded-md text-left transition hover:border-stone-300 ${
+          className={`glass-panel hover-lift p-4 rounded-md text-left transition hover:border-stone-300 ${
             isCardActive('BLOCKED') ? 'border-stone-500/60 ring-1 ring-stone-500/40 bg-stone-50' : ''
           }`}
         >
@@ -1151,24 +1152,24 @@ export default function LedgerExplorer() {
           <p className="text-xl font-semibold text-stone-600 mt-1">
             {summaryMetrics.blocked}
           </p>
-          <span className="text-[10px] text-stone-500 mt-0.5 block">Policy denied</span>
+          <span className="text-[10px] text-stone-500 mt-0.5 block">Stopped by a company rule</span>
         </button>
 
         {/* Kill-Switch Triggers */}
         <button
           onClick={() => handleSummaryCardClick('KILL_SWITCH')}
-          className={`glass-panel p-4 rounded-md text-left transition hover:border-stone-300 ${
+          className={`glass-panel hover-lift p-4 rounded-md text-left transition hover:border-stone-300 ${
             isCardActive('KILL_SWITCH') ? 'border-stone-500/60 ring-1 ring-stone-500/40 bg-stone-50' : ''
           }`}
         >
           <div className="flex items-center justify-between text-stone-600 mb-1">
-            <span className="text-[11px] font-mono uppercase font-semibold tracking-wider text-stone-600">Kill Switches</span>
+            <span className="text-[11px] uppercase font-semibold tracking-wider text-stone-600">Agents paused</span>
             <Zap className="w-4 h-4 text-stone-600" />
           </div>
           <p className="text-xl font-semibold text-stone-600 mt-1">
             {summaryMetrics.killSwitch}
           </p>
-          <span className="text-[10px] text-stone-500 mt-0.5 block">Circuit breaker</span>
+          <span className="text-[10px] text-stone-500 mt-0.5 block">Access stopped automatically</span>
         </button>
       </div>
 
@@ -1180,7 +1181,7 @@ export default function LedgerExplorer() {
             <Search className="w-4 h-4 text-stone-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search agent, action, decision ID, actor..."
+              placeholder="Search agents, tasks, or people…"
               value={searchQuery}
               onChange={e => {
                 setSearchQuery(e.target.value);
@@ -1212,8 +1213,8 @@ export default function LedgerExplorer() {
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 <span>
                   {selectedDecisions.length === 0
-                    ? 'All Decisions'
-                    : `Decisions (${selectedDecisions.length})`}
+                    ? 'All activity'
+                    : `Activity (${selectedDecisions.length})`}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 shrink-0" />
@@ -1224,7 +1225,7 @@ export default function LedgerExplorer() {
                 <div className="fixed inset-0 z-30" onClick={() => setDecisionDropdownOpen(false)} />
                 <div className="absolute left-0 md:right-0 md:left-auto mt-2 w-56 rounded-md bg-white border border-stone-300 shadow-2xl p-2 z-40 space-y-1 max-h-64 overflow-y-auto">
                   <div className="flex items-center justify-between px-2 py-1 border-b border-stone-200 text-[10px] text-stone-500 font-mono">
-                    <span>Filter Decision Types</span>
+                    <span>Show activity types</span>
                     {selectedDecisions.length > 0 && (
                       <button
                         onClick={() => setSelectedDecisions([])}
@@ -1254,7 +1255,7 @@ export default function LedgerExplorer() {
                           }}
                           className="rounded border-stone-300 text-stone-500 focus:ring-0 bg-stone-950"
                         />
-                        <span className="font-mono text-[11px]">{dec}</span>
+                        <span className="text-[11px]">{humanizeDecision(dec)}</span>
                       </label>
                     );
                   })}
@@ -1289,11 +1290,11 @@ export default function LedgerExplorer() {
             }}
             className="text-xs bg-white border border-stone-300 rounded-md px-3 py-2.5 text-stone-700 focus:outline-none focus:border-stone-900 transition cursor-pointer"
           >
-            <option value="ALL">All Risk Levels</option>
-            <option value="LOW">Low Risk</option>
-            <option value="MEDIUM">Medium Risk</option>
-            <option value="HIGH">High Risk</option>
-            <option value="RESTRICTED">Restricted</option>
+            <option value="ALL">Any possible impact</option>
+            <option value="LOW">Low impact</option>
+            <option value="MEDIUM">Medium impact</option>
+            <option value="HIGH">High impact</option>
+            <option value="RESTRICTED">Needs a person</option>
           </select>
 
           {/* Date Range Presets */}
@@ -1346,7 +1347,7 @@ export default function LedgerExplorer() {
         {/* Active Filter Chips & Clear All */}
         {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-stone-200/80 text-xs">
-            <span className="text-stone-500 text-[11px] font-mono uppercase">Active Filters:</span>
+            <span className="text-stone-500 text-[11px] uppercase">Showing:</span>
 
             {searchQuery && (
               <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-stone-100 text-stone-800 border border-stone-300 text-[11px]">
@@ -1359,7 +1360,7 @@ export default function LedgerExplorer() {
 
             {selectedDecisions.map(d => (
               <span key={d} className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-stone-100 text-stone-700 border border-stone-300 text-[11px]">
-                <span>{d}</span>
+                <span>{humanizeDecision(d)}</span>
                 <button
                   onClick={() => setSelectedDecisions(selectedDecisions.filter(x => x !== d))}
                   className="hover:text-stone-600"
@@ -1380,7 +1381,7 @@ export default function LedgerExplorer() {
 
             {selectedRisk !== 'ALL' && (
               <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-stone-100 text-stone-800 border border-stone-300 text-[11px]">
-                <span>Risk: {selectedRisk}</span>
+                <span>Impact: {humanizeRisk(selectedRisk)}</span>
                 <button onClick={() => setSelectedRisk('ALL')} className="hover:text-stone-600">
                   <X className="w-3 h-3" />
                 </button>
@@ -1430,12 +1431,12 @@ export default function LedgerExplorer() {
             <thead>
               <tr className="sticky top-0 bg-white/95 backdrop-blur z-10 border-b border-stone-200 text-[11px] font-mono uppercase text-stone-600">
                 <th className="py-3.5 px-4 font-semibold">Time</th>
-                <th className="py-3.5 px-4 font-semibold">Event</th>
+                <th className="py-3.5 px-4 font-semibold">What happened</th>
                 <th className="py-3.5 px-4 font-semibold">Agent</th>
                 <th className="py-3.5 px-4 font-semibold">Action / Amount</th>
                 <th className="py-3.5 px-4 font-semibold">Risk</th>
-                <th className="py-3.5 px-4 font-semibold">Decision</th>
-                <th className="py-3.5 px-4 font-semibold">Actor</th>
+                <th className="py-3.5 px-4 font-semibold">Result</th>
+                <th className="py-3.5 px-4 font-semibold">Requested by</th>
               </tr>
             </thead>
 
@@ -1513,21 +1514,21 @@ export default function LedgerExplorer() {
                       <td className="py-3 px-4 whitespace-nowrap">
                         <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded border text-[11px] font-semibold ${eventBadge.bg} ${eventBadge.color}`}>
                           <EventIcon className="w-3 h-3 shrink-0" />
-                          <span>{entry.event_type}</span>
+                          <span>{humanizeEvent(entry.event_type)}</span>
                         </span>
                       </td>
 
                       {/* Agent */}
                       <td className="py-3 px-4 whitespace-nowrap font-medium text-stone-800">
                         <div className="flex items-center space-x-1.5">
-                          <Bot className="w-3.5 h-3.5 text-stone-500" />
+                          <UserRound className="w-3.5 h-3.5 text-stone-500" />
                           <span>{payload.agent_id || entry.actor}</span>
                         </div>
                       </td>
 
                       {/* Action + amount */}
                       <td className="py-3 px-4 whitespace-nowrap font-mono text-[11px] text-stone-700">
-                        <span>{payload.action || '—'}</span>
+                        <span>{payload.action ? humanizeAction(payload.action) : '—'}</span>
                         {payload.amount !== undefined && payload.amount > 0 && (
                           <span className="ml-2 font-semibold text-stone-600 font-sans">
                             {formatCurrency(payload.amount)}
@@ -1538,7 +1539,7 @@ export default function LedgerExplorer() {
                       {/* Risk */}
                       <td className="py-3 px-4 whitespace-nowrap">
                         <span className={`inline-block px-2 py-0.5 rounded border text-[10px] font-mono font-medium ${riskPill.classes}`}>
-                          {riskPill.label}
+                          {riskPill.label && payload.risk_level ? `${humanizeRisk(payload.risk_level)} · ${riskPill.label.split(' ').at(-1)}` : riskPill.label}
                         </span>
                       </td>
 
@@ -1546,7 +1547,7 @@ export default function LedgerExplorer() {
                       <td className="py-3 px-4 whitespace-nowrap">
                         <span className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded border text-[10px] font-mono font-medium ${decisionBadge.bg}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${decisionBadge.dot}`} />
-                          <span>{decisionBadge.label}</span>
+                          <span>{humanizeDecision(decisionBadge.label)}</span>
                         </span>
                       </td>
 

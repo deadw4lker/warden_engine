@@ -6,19 +6,20 @@ import json
 import hashlib
 import uuid
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from app.config import settings
 from app.db import get_connection
 from app.services.agent_service import get_agent_by_id, pause_agent
+from app.services import guard_model_service as guard_svc
 from app.services.policy_service import evaluate_policy, RESTRICTED_ACTIONS
 from app.services.risk_service import calculate_blast_radius
 from app.services.ledger_service import append_ledger_entry, get_ledger_entries, canonical_json
 
-LAYER_ORDER = ["L1", "L2", "L3", "L4"]
+LAYER_ORDER = ["L0", "L1", "L2", "L3", "L4"]
 
 
 def _layer(name: str, check: str, passed: bool, detail: str = ""):
-    """One four-layer checklist entry (PDF sections 2-5)."""
+    """One five-layer checklist entry: L0 content guard + PDF sections 2-5."""
     return {"layer": name, "check": check,
             "result": "pass" if passed else "fail", "detail": detail}
 
@@ -140,15 +141,108 @@ async def process_action_request(
     idempotency_key = None
 
     try:
+        # ---- Layer 0: content guard (Qwen3Guard; enforces PDF policy C-03) ----
+        layers: List[Dict[str, Any]] = []
+        guard_verdict = None
+        guard_snapshot: Optional[Dict[str, Any]] = None
+        guard_input = guard_svc.guard_text_from_params(params, action) if guard_svc.guard_enabled() else ""
+        if guard_svc.guard_enabled() and guard_input:
+            guard_verdict = await guard_svc.run_prompt_guard(agent_id, guard_input)
+            g_safety = guard_verdict.get("safety")
+            guard_snapshot = guard_svc.opa_guard_snapshot(guard_verdict)
+
+            if g_safety == "ERROR":
+                if guard_svc.fail_closed():
+                    layers.append(_layer("L0", "content_guard", False,
+                                         f"Qwen3Guard unavailable (fail-closed): {guard_verdict.get('raw')}"))
+                    layers = _finish_layers(layers, "L0")
+                    explanation = "Blocked (Fail-Closed): content guard service unavailable"
+                    ledger_record = append_ledger_entry(
+                        event_type="ACTION_BLOCKED",
+                        actor=agent_id,
+                        payload={"decision_id": decision_id, "action": action,
+                                 "reason": explanation, "layers": layers,
+                                 "guard": {"error": str(guard_verdict.get("raw"))}}
+                    )
+                    return {
+                        "decision": "BLOCKED",
+                        "decision_id": decision_id,
+                        "risk_score": 1.0,
+                        "risk_level": "BLOCKED",
+                        "explanation": explanation,
+                        "risk_breakdown": {},
+                        "ledger_hash": ledger_record["hash"],
+                        "layers": layers,
+                    }
+                layers.append(_layer("L0", "content_guard", True,
+                                     f"Qwen3Guard unavailable (fail-open permitted): {guard_verdict.get('raw')}"))
+            elif g_safety == "Unsafe":
+                strike = None
+                if guard_verdict.has_jailbreak:
+                    strike = guard_svc.record_override_strike(agent_id)
+                    detail = (f"Qwen3Guard: instruction-override attempt "
+                              f"(strike {strike['strike_count']}/{strike['threshold']})")
+                else:
+                    detail = "Qwen3Guard verdict: " + guard_svc.compose_verdict_list(guard_verdict)
+                layers.append(_layer("L0", "content_guard", False, detail))
+                layers = _finish_layers(layers, "L0")
+                explanation = f"Blocked: Content guard denied request ({detail})"
+                kill_now = bool(strike and strike.get("escalate"))
+                if kill_now:
+                    try:
+                        pause_agent(
+                            agent_id=agent_id,
+                            reason=(f"Kill switch: repeated instruction-override attempts "
+                                    f"({strike['strike_count']}/{strike['threshold']} within window)"),
+                            actor="WARDEN_GUARD",
+                            is_kill_switch=True,
+                        )
+                    except Exception as pe:
+                        print(f"[WARDEN] Error pausing agent on guard strike: {pe}")
+                    append_ledger_entry(
+                        event_type="GUARD_KILL_SWITCH",
+                        actor=agent_id,
+                        payload={"decision_id": decision_id, "action": action,
+                                 "strikes": strike, "guard": guard_snapshot}
+                    )
+                ledger_record = append_ledger_entry(
+                    event_type="GUARD_BLOCK",
+                    actor=agent_id,
+                    payload={"decision_id": decision_id, "action": action,
+                             "guard": guard_snapshot, "kill_switch_activated": kill_now,
+                             "explanation": explanation, "layers": layers}
+                )
+                return {
+                    "decision": "BLOCKED",
+                    "decision_id": decision_id,
+                    "risk_score": 1.0,
+                    "risk_level": "BLOCKED",
+                    "explanation": explanation,
+                    "risk_breakdown": {"guard": guard_snapshot},
+                    "ledger_hash": ledger_record["hash"],
+                    "layers": layers,
+                }
+            elif g_safety == "Controversial":
+                layers.append(_layer("L0", "content_guard", True,
+                                     "Qwen3Guard: Controversial — carried into OPA input for "
+                                     "Rego routing (PENDING_APPROVAL under guard policy)"))
+            else:
+                layers.append(_layer("L0", "content_guard", True,
+                                     f"Qwen3Guard verdict: {guard_svc.compose_verdict_list(guard_verdict)}"))
+        elif guard_svc.guard_enabled():
+            layers.append(_layer("L0", "content_guard", True,
+                                 "Structured proposal without free text — L1-L4 governance applies"))
+        else:
+            layers.append(_layer("L0", "content_guard", True,
+                                 "Qwen3Guard disabled in this deployment (L1-L4 remain active)"))
+
         # 1. Fetch Agent Passport
         agent = get_agent_by_id(agent_id)
         if not agent:
             # Unregistered agent -> fail-closed
-            layers = _finish_layers(
-                [_layer("L1", "agent_identity", False,
-                        f"Agent '{agent_id}' not registered in WARDEN registry")],
-                "L1",
-            )
+            layers.append(_layer("L1", "agent_identity", False,
+                                 f"Agent '{agent_id}' not registered in WARDEN registry"))
+            layers = _finish_layers(layers, "L1")
             explanation = f"Blocked: Agent '{agent_id}' is not registered in WARDEN registry"
             ledger_record = append_ledger_entry(
                 event_type="ACTION_BLOCKED",
@@ -173,14 +267,15 @@ async def process_action_request(
 
         # ---- Layer 1: identity ----
         l1_pass = agent.get("status") == "active"
-        layers = [_layer("L1", "agent_identity", l1_pass,
-                         f"Passport '{agent_id}' verified; status={agent.get('status')}")]
+        layers.append(_layer("L1", "agent_identity", l1_pass,
+                             f"Passport '{agent_id}' verified; status={agent.get('status')}"))
         if not l1_pass:
             # Suspended/revoked agents stop here (PDF section 2) — no kill
             # switch: the identity is already contained, just deny + log.
             layers = _finish_layers(layers, "L1")
             explanation = (f"Blocked: Agent '{agent_id}' is not active "
-                           f"(status={agent.get('status')}); suspended identities cannot propose actions")
+                           f"(status={agent.get('status')}); passports must be 'active' "
+                           f"before proposing actions")
             ledger_record = append_ledger_entry(
                 event_type="ACTION_BLOCKED",
                 actor=agent_id,
@@ -248,7 +343,8 @@ async def process_action_request(
             layers.append(_layer("L2", "requester_recorded", True,
                                  "No requester context supplied with proposal"))
 
-        # 2. Policy Engine evaluation (OPA or Python fallback)
+        # 2. Policy Engine evaluation (OPA or Python fallback), carrying the
+        # L0 Qwen3Guard signature so Rego rules can route on it.
         policy_result = await evaluate_policy(
             agent=agent,
             action=action,
@@ -256,7 +352,8 @@ async def process_action_request(
             amount=safe_amount,
             params=params,
             order=order,
-            records_affected=safe_records
+            records_affected=safe_records,
+            guard=guard_snapshot,
         )
         policy_engine = policy_result.get("engine", "unknown")
 

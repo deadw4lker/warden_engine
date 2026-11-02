@@ -66,4 +66,6 @@ class ConnectionRunResponse(BaseModel):
     task: str
     model_text: Optional[str] = None
     decisions: List[ToolDecisionDetail] = Field(default_factory=list)
+    # Layer 0 guard metadata: {"response": {safety, categories, redacted, ...}}
+    guard: Optional[Dict[str, Any]] = None
     summary: str

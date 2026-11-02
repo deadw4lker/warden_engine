@@ -92,10 +92,14 @@ def evaluate_python_rules(input_data: Dict[str, Any]) -> Dict[str, Any]:
     Guarantees deterministic pre-execution policy enforcement even without OPA running.
     """
     violations: List[str] = []
+    reviews: List[str] = []
     agent = input_data.get("agent", {})
     action = input_data.get("action", "")
     data_class = input_data.get("data_class", "public")
     amount = float(input_data.get("amount", 0.0) or 0.0)
+    guard = input_data.get("guard") or {}
+    g_safety = str(guard.get("safety") or "").lower()
+    g_categories = [str(c) for c in (guard.get("categories") or [])]
 
     # 1. Agent status must be active
     status = agent.get("status", "unknown")
@@ -121,12 +125,20 @@ def evaluate_python_rules(input_data: Dict[str, Any]) -> Dict[str, Any]:
     if amount > max_amount:
         violations.append(f"Requested amount {amount} exceeds agent maximum limit of {max_amount}")
 
+    # 6. Layer 0 guard signature (backstop parity with policies/*.rego):
+    # Unsafe content is a hard violation; Controversial goes to human review.
+    if g_safety == "unsafe":
+        cats = ", ".join(g_categories) or "unsafe"
+        violations.append(f"Qwen3Guard L0 flagged request as Unsafe ({cats})")
+    elif g_safety == "controversial":
+        reviews.append("Qwen3Guard L0 flagged request as Controversial — human review required")
+
     allow = len(violations) == 0
     return {
         "allow": allow,
         "violations": violations,
         "soft_denials": [],
-        "reviews": [],
+        "reviews": reviews,
         "engine": "python_fallback"
     }
 
@@ -137,12 +149,15 @@ async def evaluate_policy(
     amount: float,
     params: Optional[Dict[str, Any]] = None,
     order: Optional[Dict[str, Any]] = None,
-    records_affected: int = 0
+    records_affected: int = 0,
+    guard: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
     Evaluate policy using OPA HTTP endpoint if available, falling back to Python evaluator.
     Passes through soft_denials (block without kill switch) and reviews
     (allowed but needs human approval) when the OPA bundle provides them.
+    `guard` carries the Layer 0 Qwen3Guard signature ({safety, categories, ...})
+    as a first-class policy input so Rego can route Unsafe/Controversial.
     """
     input_data = {
         "agent": {
@@ -162,6 +177,7 @@ async def evaluate_policy(
         "params": params or {},
         "order": order or {},
         "metadata": _request_metadata(agent.get("agent_id", "")),
+        "guard": guard or {},
     }
 
     # Gibberish guard runs before OPA so nonsense is always judged by WARDEN

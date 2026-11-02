@@ -4,6 +4,7 @@ import {
   CheckSquare, XCircle, Clock, Loader2, ChevronDown,
   ChevronUp, AlertTriangle, AlertCircle, RefreshCw, FileText, User
 } from 'lucide-react';
+import { describeLayer, humanizeAction, humanizeDecision, humanizeIdentifier, humanizeLayer, humanizeRole } from '../utils/userText';
 
 function SlaCountdown({ deadline }) {
   const [remaining, setRemaining] = useState(null);
@@ -25,10 +26,10 @@ function SlaCountdown({ deadline }) {
   const isExpired = remaining <= 0;
 
   const fmt = (s) => {
-    if (s <= 0) return 'EXPIRED';
+    if (s <= 0) return 'Time expired';
     const m = Math.floor(s / 60);
     const sec = s % 60;
-    return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+    return m > 0 ? `${m}m ${sec}s left` : `${sec}s left`;
   };
 
   return (
@@ -53,7 +54,7 @@ function OutcomeBadge({ status }) {
   }
   return (
     <span className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${cls}`}>
-      {norm === 'PENDING' ? 'PENDING' : norm}
+      {humanizeDecision(norm)}
     </span>
   );
 }
@@ -68,7 +69,7 @@ function ApprovalCard({ approval, user, onAction }) {
   const normStatus = (approval.status || '').toUpperCase();
   const isPending = normStatus === 'PENDING' || normStatus === 'PENDING_APPROVAL' || normStatus === 'ESCALATED';
 
-  const actionName = approval.action || approval.action_type || 'Unknown action';
+  const actionName = humanizeAction(approval.action || approval.action_type);
   const level = approval.escalation_level || approval.tier || null;
   const deadline = approval.sla_deadline || approval.expires_at || null;
 
@@ -103,10 +104,11 @@ function ApprovalCard({ approval, user, onAction }) {
   };
 
   const evidence = approval.evidence_pack || {};
+  const evidenceLayers = Array.isArray(evidence.layers) ? evidence.layers : [];
   const riskScore = approval.risk_score ?? evidence.risk_score;
 
   return (
-    <div className={`glass-panel rounded-lg overflow-hidden transition ${isPending ? '' : 'opacity-70'}`}>
+    <div className={`glass-panel hover-lift rounded-lg overflow-hidden transition ${isPending ? '' : 'opacity-70'}`}>
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -115,13 +117,13 @@ function ApprovalCard({ approval, user, onAction }) {
               {isPending && <SlaCountdown deadline={deadline} />}
               {level && (
                 <span className="text-[10px] font-mono text-stone-600 bg-stone-100 border border-stone-200 px-1.5 py-0.5 rounded">
-                  {level}
+                  {humanizeRole(level)}
                 </span>
               )}
             </div>
             <p className="font-semibold text-stone-900 mt-1.5 truncate">{actionName}</p>
             <p className="text-xs text-stone-500 font-mono mt-0.5 truncate">
-              Agent: {approval.agent_id}
+              Agent: {humanizeIdentifier(approval.agent_id)}
               {approval.amount > 0 ? ` · $${approval.amount}` : ''}
             </p>
           </div>
@@ -137,7 +139,7 @@ function ApprovalCard({ approval, user, onAction }) {
         {riskScore !== undefined && riskScore !== null && (
           <div className="mt-3">
             <div className="flex justify-between text-[10px] text-stone-500 mb-1">
-              <span>Blast Radius Score</span>
+              <span>Possible impact</span>
               <span className="font-semibold font-mono text-stone-700">
                 {(Number(riskScore) * 100).toFixed(0)}%
               </span>
@@ -157,11 +159,28 @@ function ApprovalCard({ approval, user, onAction }) {
         <div className="px-5 pb-5 space-y-3 border-t border-stone-200 pt-4">
           <div className="flex items-center space-x-2 text-xs text-stone-600 font-semibold">
             <FileText className="w-3.5 h-3.5" />
-            <span>Evidence Pack</span>
+            <span>Why this request was flagged</span>
           </div>
-          <pre className="text-[10px] font-mono text-stone-200 bg-stone-950 rounded-md p-3 overflow-x-auto max-h-48">
-            {JSON.stringify(evidence, null, 2)}
-          </pre>
+          {evidence.explanation && (
+            <p className="text-xs leading-relaxed text-stone-700">{evidence.explanation}</p>
+          )}
+          {evidenceLayers.length > 0 ? (
+            <ul className="space-y-2">
+              {evidenceLayers.map((layer, index) => (
+                <li key={`${layer.layer}-${index}`} className="flex items-start gap-2 text-xs">
+                  <span className={`mt-0.5 font-semibold ${layer.result === 'pass' ? 'text-emerald-700' : layer.result === 'fail' ? 'text-red-700' : 'text-stone-400'}`}>
+                    {layer.result === 'pass' ? '✓' : layer.result === 'fail' ? '!' : '·'}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="font-medium text-stone-800">{humanizeLayer(layer.layer)}</span>
+                    <span className="block text-stone-500">{describeLayer(layer)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-stone-500">No extra check details were saved for this request.</p>
+          )}
           {approval.resolved_by && (
             <div className="flex items-center space-x-2 text-xs text-stone-500">
               <User className="w-3 h-3" />
@@ -185,7 +204,7 @@ function ApprovalCard({ approval, user, onAction }) {
           <div>
             <input
               type="text"
-              placeholder="Reason for decision..."
+              placeholder="Add a note (required if you decline)"
               value={reason}
               onChange={e => {
                 setReason(e.target.value);
@@ -210,7 +229,7 @@ function ApprovalCard({ approval, user, onAction }) {
               className="flex-1 flex items-center justify-center space-x-1.5 py-2 bg-white hover:bg-red-50 text-red-800 border border-red-200 rounded-md text-xs font-semibold transition disabled:opacity-50"
             >
               {loading === 'reject' ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
-              <span>Disapprove</span>
+              <span>Decline</span>
             </button>
             <button
               id={`approve-${approval.id}`}
@@ -226,14 +245,20 @@ function ApprovalCard({ approval, user, onAction }) {
       )}
       {isPending && !canAct && (
         <div className="px-5 pb-4">
-          <p className="text-[11px] text-stone-500">Auditors have read-only access — approval requires an admin or reviewer role.</p>
+          <p className="text-[11px] text-stone-500">Your account can view requests but cannot make the decision. Ask a reviewer for help.</p>
         </div>
       )}
     </div>
   );
 }
 
-const FILTERS = ['PENDING', 'APPROVED', 'REJECTED', 'TIMED_OUT', 'ALL'];
+const FILTERS = [
+  { id: 'PENDING', label: 'Needs review' },
+  { id: 'APPROVED', label: 'Approved' },
+  { id: 'REJECTED', label: 'Declined' },
+  { id: 'TIMED_OUT', label: 'Time expired' },
+  { id: 'ALL', label: 'All requests' },
+];
 
 export default function Approvals({ user }) {
   const [approvals, setApprovals] = useState([]);
@@ -272,17 +297,17 @@ export default function Approvals({ user }) {
   }).length;
 
   return (
-    <div className="p-6 space-y-5 max-w-5xl mx-auto">
+    <div className="w-full min-h-full p-6 space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-stone-900">Approvals Queue</h2>
-          <p className="text-stone-500 text-sm mt-0.5">Human-in-the-loop review with SLA countdowns</p>
+          <h2 className="text-xl font-semibold text-stone-900">Requests to review</h2>
+          <p className="text-stone-500 text-sm mt-0.5">Review requests that need your decision before the deadline.</p>
         </div>
         <div className="flex items-center space-x-2">
           {pendingCount > 0 && (
             <div className="flex items-center space-x-1.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-md font-medium">
               <AlertTriangle className="w-3 h-3" />
-              <span>{pendingCount} pending</span>
+              <span>{pendingCount} need review</span>
             </div>
           )}
           <button onClick={load} className="p-2 rounded-md border border-stone-300 text-stone-600 hover:text-stone-900 transition">
@@ -293,17 +318,17 @@ export default function Approvals({ user }) {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
-        {FILTERS.map(s => (
+        {FILTERS.map(({ id, label }) => (
           <button
-            key={s}
-            onClick={() => setFilter(s)}
+            key={id}
+            onClick={() => setFilter(id)}
             className={`px-3 py-1.5 text-xs font-mono font-medium rounded-md border transition ${
-              filter === s
+              filter === id
                 ? 'bg-stone-900 text-white border-stone-900'
                 : 'text-stone-500 border-stone-200 hover:border-stone-300 hover:text-stone-600'
             }`}
           >
-            {s}
+            {label}
           </button>
         ))}
       </div>
@@ -315,7 +340,7 @@ export default function Approvals({ user }) {
       ) : approvals.length === 0 ? (
         <div className="text-center py-16 text-stone-500">
           <CheckSquare className="w-10 h-10 mx-auto mb-3 opacity-40" />
-          <p>No approvals in this queue</p>
+          <p>No requests in this list</p>
         </div>
       ) : (
         <div className="space-y-4">

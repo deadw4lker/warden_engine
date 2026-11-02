@@ -7,26 +7,30 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      fontSize: {
+        xs: ['0.875rem', { lineHeight: '1.35rem' }],
+        sm: ['1rem', { lineHeight: '1.5rem' }],
+      },
       colors: {
-        paper: '#F2EFE9',
+        paper: '#F4F7FA',
         card: '#FFFFFF',
-        line: '#E6E0D3',
+        line: '#DCE6EC',
         ink: '#1C1917',
         warden: {
-          dark: '#F2EFE9',
+          dark: '#F4F7FA',
           panel: '#FFFFFF',
           surface: '#FFFFFF',
-          border: '#E6E0D3',
-          primary: '#1C1917',
+          border: '#DCE6EC',
+          primary: '#2F7182',
           danger: '#B91C1C',
           warning: '#92400E',
           success: '#166534',
-          accent: '#9A3412'
+          accent: '#4B91A0'
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+        mono: ['Consolas', '"Courier New"', 'monospace'],
       }
     },
   },

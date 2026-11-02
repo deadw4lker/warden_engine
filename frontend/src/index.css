@@ -4,15 +4,122 @@
 
 @layer base {
   body {
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    background-color: #F2EFE9;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 500;
+    background-color: #F4F7FA;
     color: #1C1917;
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
   }
 
-  code, pre, .font-mono {
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  code, pre {
+    font-family: Consolas, 'Courier New', monospace;
   }
+}
+
+/* Keep technical-looking fixed-width text only for code and input values. */
+.font-mono:not(code):not(pre):not(input) {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  letter-spacing: normal;
+}
+
+/* Raise the smallest labels and helper text to comfortable reading sizes. */
+[class~="text-[9px]"],
+[class~="text-[10px]"] {
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  font-weight: 500 !important;
+}
+
+[class~="text-[11px]"] {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
+}
+
+[class~="text-[12px]"] {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
+}
+
+[class~="text-[13px]"] {
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
+}
+
+/* Keep low-emphasis labels and supporting copy easy to read at a glance. */
+[class~="text-stone-400"][class~="text-[9px]"],
+[class~="text-stone-400"][class~="text-[10px]"],
+[class~="text-stone-500"][class~="text-[9px]"],
+[class~="text-stone-500"][class~="text-[10px]"] {
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+}
+
+[class~="text-stone-400"][class~="text-[11px]"],
+[class~="text-stone-500"][class~="text-[11px]"],
+[class~="text-stone-400"][class~="text-xs"],
+[class~="text-stone-500"][class~="text-xs"] {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+[class~="text-stone-400"][class~="text-[12px]"],
+[class~="text-stone-500"][class~="text-[12px]"],
+[class~="text-stone-400"][class~="text-sm"],
+[class~="text-stone-500"][class~="text-sm"] {
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+}
+
+.text-stone-400 {
+  color: #78716c !important;
+}
+
+.text-stone-500 {
+  color: #57534e !important;
+}
+
+/* Soft blue accents echo the WARDEN wordmark while keeping the interface calm. */
+.bg-stone-50 {
+  background-color: #F8FBFC !important;
+}
+
+.bg-stone-100 {
+  background-color: #EAF3F5 !important;
+}
+
+.bg-stone-900 {
+  background-color: #2F7182 !important;
+}
+
+.border-stone-200,
+[class~="border-[#E6E0D3]"] {
+  border-color: #C9D9E0 !important;
+}
+
+.border-stone-300 {
+  border-color: #B9CDD5 !important;
+}
+
+.border-stone-900 {
+  border-color: #2F7182 !important;
+}
+
+[class~="hover:bg-stone-800"]:hover {
+  background-color: #265D6B !important;
+}
+
+[class~="hover:bg-stone-900"]:hover {
+  background-color: #265D6B !important;
+}
+
+[class~="focus:border-stone-900"]:focus {
+  border-color: #4D91A0 !important;
 }
 
 /* Thin neutral scrollbar */
@@ -24,58 +131,125 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D6D0C2;
+  background: #C8D5DF;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8AE9C;
+  background: #A9BBC9;
 }
 
-/* Flat clean card - replaces glass look */
+/* Raised card surfaces with a soft highlight and layered depth. */
 .card {
-  background: #FFFFFF;
-  border: 1px solid #E6E0D3;
+  background: linear-gradient(155deg, #FFFFFF 0%, #FBFDFE 100%);
+  border: 1px solid #C5D8DF;
   border-radius: 8px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 2px 4px rgba(31, 72, 91, 0.065),
+    0 9px 18px rgba(31, 72, 91, 0.085),
+    0 20px 34px rgba(31, 72, 91, 0.055);
 }
 
-/* Keep old class name working so pages don't break, but render flat */
+/* Keep existing panel names and give them consistent, restrained depth. */
 .glass-panel {
-  background: #FFFFFF;
-  border: 1px solid #E6E0D3;
+  background: linear-gradient(155deg, #FFFFFF 0%, #FBFDFE 100%);
+  border: 1px solid #C5D8DF;
   border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.05);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 2px 4px rgba(31, 72, 91, 0.065),
+    0 9px 20px rgba(31, 72, 91, 0.09),
+    0 20px 36px rgba(31, 72, 91, 0.06);
 }
 
-.glow-emerald,
-.glow-rose,
+/* Selective glass surfaces for the main navigation and key dashboard cards. */
+.glass-surface {
+  background: rgba(255, 255, 255, 0.91);
+  border: 1px solid rgba(65, 126, 143, 0.3);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 2px 4px rgba(42, 94, 109, 0.065),
+    0 9px 20px rgba(42, 94, 109, 0.09),
+    0 20px 36px rgba(42, 94, 109, 0.06);
+  -webkit-backdrop-filter: blur(14px) saturate(118%);
+  backdrop-filter: blur(14px) saturate(118%);
+}
+
+/* Make the existing plain white cards read as distinct surfaces too. */
+div[class~="bg-white"][class~="border"][class~="rounded-lg"],
+article[class~="bg-white"][class~="border"][class~="rounded-lg"],
+section[class~="bg-white"][class~="border"][class~="rounded-lg"] {
+  border-color: #C5D8DF !important;
+  box-shadow:
+    0 1px 2px rgba(31, 72, 91, 0.055),
+    0 7px 16px rgba(31, 72, 91, 0.075);
+}
+
+.hover-lift {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    border-color: rgba(47, 113, 130, 0.38);
+  }
+}
+
+.action-pop {
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .action-pop:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.action-pop:active {
+  transform: scale(0.985);
+}
+
+@keyframes soft-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.motion-enter {
+  animation: soft-enter 420ms cubic-bezier(0.2, 0.7, 0.25, 1) both;
+}
+
+.motion-delay-75 { animation-delay: 75ms; }
+.motion-delay-150 { animation-delay: 150ms; }
+.motion-delay-225 { animation-delay: 225ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-enter,
+  .hover-lift,
+  .action-pop,
+  .layer-reveal {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .action-pop:active {
+    transform: none;
+  }
+}
+
+.glow-emerald {
+  box-shadow: 0 3px 8px rgba(16, 185, 129, 0.08), 0 14px 28px rgba(31, 72, 91, 0.075);
+}
+
+.glow-rose {
+  box-shadow: 0 3px 8px rgba(244, 63, 94, 0.08), 0 14px 28px rgba(31, 72, 91, 0.075);
+}
+
 .glow-sky {
-  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06);
+  box-shadow: 0 3px 8px rgba(14, 165, 233, 0.08), 0 14px 28px rgba(31, 72, 91, 0.075);
 }
 
-/* Submarine radar sweep (light theme, subtle) */
-@keyframes sonar-sweep-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-@keyframes sonar-blip-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.45; }
-}
-.sonar-sweep-light {
-  background: conic-gradient(
-    from 0deg,
-    rgba(28, 25, 23, 0.10) 0deg,
-    rgba(28, 25, 23, 0.045) 45deg,
-    rgba(28, 25, 23, 0.015) 90deg,
-    transparent 130deg
-  );
-  animation: sonar-sweep-rotate 5s linear infinite;
-}
-.sonar-blip-light {
-  animation: sonar-blip-soft 2.4s ease-in-out infinite;
-}
-
-/* Layer-by-layer reveal for the radar detail list */
+/* Layer-by-layer reveal for request details */
 @keyframes layer-reveal {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: none; }
@@ -83,3 +257,4 @@
 .layer-reveal {
   animation: layer-reveal 0.45s ease both;
 }
+

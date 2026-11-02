@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api';
 import {
-  Bot, Plug, Copy, Check, KeyRound, RefreshCw, Play,
+  UserRound, Plug, Copy, Check, KeyRound, RefreshCw, Play,
   Pause, Trash2, FlaskConical, Loader2, FileText,
 } from 'lucide-react';
+import { humanizeAction, humanizeConnectionStatus, humanizeDataClass, humanizeDecision } from '../utils/userText';
 
 const COMMON_ACTIONS = [
   'book_ticket', 'cancel_ticket', 'issue_refund', 'issue_replacement',
@@ -111,7 +112,7 @@ function RegisterTab() {
   const handleKeyInfo = async () => {
     setKmError('');
     setKmInfo(null);
-    if (!kmId.trim()) return setKmError('Enter an agent_id.');
+    if (!kmId.trim()) return setKmError('Enter the agent connection name.');
     setKmLoading(true);
     try {
       setKmInfo(await api.getAgentKeyInfo(kmId.trim()));
@@ -125,8 +126,8 @@ function RegisterTab() {
   const handleRotate = async () => {
     setKmError('');
     setRotated(null);
-    if (!kmId.trim()) return setKmError('Enter an agent_id.');
-    if (!window.confirm(`Rotate the API key for '${kmId.trim()}'? The old key stops working immediately.`)) return;
+    if (!kmId.trim()) return setKmError('Enter the agent connection name.');
+    if (!window.confirm(`Replace the access key for '${kmId.trim()}'? The old key will stop working immediately.`)) return;
     setKmLoading(true);
     try {
       const data = await api.rotateAgentKey(kmId.trim());
@@ -143,20 +144,20 @@ function RegisterTab() {
     <div className="grid lg:grid-cols-2 gap-4">
       <div className="bg-white border border-[#E6E0D3] rounded-lg p-5">
         <h3 className="text-[14px] font-semibold text-stone-900 flex items-center gap-2">
-          <Bot className="w-4 h-4" /> Register your agent
+          <UserRound className="w-4 h-4" /> Add your agent
         </h3>
         <p className="text-[12px] text-stone-500 mt-1 mb-4">
-          No admin needed. Guardrailed: safe actions only, budget capped at Rs 1,00,000, you become the owner.
+          Add an agent and set the tasks it can do. You will be listed as the person responsible for it.
         </p>
         <form onSubmit={handleRegister} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelCls}>Agent name</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Ticket Booking Bot" />
+              <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Ticket booking assistant" />
             </div>
             <div>
-              <label className={labelCls}>agent_id (optional)</label>
-              <input value={agentId} onChange={(e) => setAgentId(e.target.value)} className={inputCls} placeholder="auto from name" />
+              <label className={labelCls}>Connection name (optional)</label>
+              <input value={agentId} onChange={(e) => setAgentId(e.target.value)} className={inputCls} placeholder="Filled in from the name" />
             </div>
           </div>
           <div>
@@ -164,7 +165,7 @@ function RegisterTab() {
             <input value={purpose} onChange={(e) => setPurpose(e.target.value)} className={inputCls} placeholder="Books, cancels and refunds event tickets" />
           </div>
           <div>
-            <label className={labelCls}>Allowed actions (comma separated)</label>
+            <label className={labelCls}>What tasks can it do? (separate with commas)</label>
             <input value={actions} onChange={(e) => setActions(e.target.value)} className={inputCls} placeholder="book_ticket, issue_refund" />
             <div className="flex gap-1.5 flex-wrap mt-2">
               {COMMON_ACTIONS.map((a) => (
@@ -174,19 +175,19 @@ function RegisterTab() {
                   onClick={() => setActions((prev) => (prev.split(',').map((x) => x.trim()).includes(a) ? prev : (prev ? prev + ', ' + a : a)))}
                   className="text-[11px] px-2 py-0.5 rounded-md border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-600 transition font-mono"
                 >
-                  {a}
+                  {humanizeAction(a)}
                 </button>
               ))}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelCls}>Data classes</label>
+              <label className={labelCls}>Information it can use</label>
               <div className="flex gap-2">
                 {['public', 'internal'].map((dc) => (
                   <label key={dc} className="flex items-center gap-1.5 text-[12px] text-stone-700">
                     <input type="checkbox" checked={dataClasses.includes(dc)} onChange={() => toggleDc(dc)} />
-                    {dc}
+                    {humanizeDataClass(dc)}
                   </label>
                 ))}
               </div>
@@ -199,7 +200,7 @@ function RegisterTab() {
           <ErrorBox error={error} />
           <button type="submit" disabled={loading} className={btnPrimary}>
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {loading ? 'Registering...' : 'Register agent & issue key'}
+            {loading ? 'Adding agent...' : 'Add agent and create access key'}
           </button>
         </form>
       </div>
@@ -208,18 +209,18 @@ function RegisterTab() {
         {result && (
           <div className="bg-white border border-emerald-200 rounded-lg p-5">
             <h3 className="text-[14px] font-semibold text-emerald-800 flex items-center gap-2">
-              <KeyRound className="w-4 h-4" /> Connected — copy your key now
+              <KeyRound className="w-4 h-4" /> Agent added — copy this key now
             </h3>
-            <p className="text-[12px] text-stone-500 mt-1 mb-3">Shown <b>once</b>. It cannot be recovered — rotate if lost.</p>
+            <p className="text-[12px] text-stone-500 mt-1 mb-3">This key is shown once. Save it now; if you lose it, create a replacement.</p>
             <div className="flex items-center gap-2 bg-stone-900 text-white font-mono text-[12px] rounded-md px-3 py-2.5 break-all">
               <span className="flex-1">{result.api_key}</span>
               <CopyButton text={result.api_key} />
             </div>
             <div className="text-[12px] text-stone-600 mt-2 font-mono">
-              agent_id: {result.agent_id} · owner: {result.owner} · prefix: {result.api_key_prefix}
+              Connection name: {result.agent_id} · Responsible person: {result.owner}
             </div>
             <div className="mt-3">
-              <div className="text-[12px] font-medium text-stone-700 mb-1">SDK snippet (pre-filled)</div>
+              <div className="text-[12px] font-medium text-stone-700 mb-1">Setup code for your developer</div>
               <div className="relative bg-stone-50 border border-stone-200 rounded-md p-3">
                 <pre className="text-[11px] font-mono text-stone-800 whitespace-pre-wrap">{sdkSnippet(result.agent_id, result.api_key)}</pre>
                 <div className="absolute top-2 right-2"><CopyButton text={sdkSnippet(result.agent_id, result.api_key)} /></div>
@@ -230,19 +231,19 @@ function RegisterTab() {
 
         <div className="bg-white border border-[#E6E0D3] rounded-lg p-5">
           <h3 className="text-[14px] font-semibold text-stone-900 flex items-center gap-2">
-            <RefreshCw className="w-4 h-4" /> Key management
+            <RefreshCw className="w-4 h-4" /> Access key help
           </h3>
-          <p className="text-[12px] text-stone-500 mt-1 mb-3">Check which key is live, rotate a leaked key. Owner or admin only.</p>
+          <p className="text-[12px] text-stone-500 mt-1 mb-3">Check an agent’s key or replace one that may have been shared. Available to the owner or an administrator.</p>
           <div className="flex gap-2">
-            <input value={kmId} onChange={(e) => setKmId(e.target.value)} className={inputCls} placeholder="agent_id" />
-            <button onClick={handleKeyInfo} disabled={kmLoading} className={btnSecondary}>Inspect</button>
-            <button onClick={handleRotate} disabled={kmLoading} className={btnSecondary}>Rotate</button>
+            <input value={kmId} onChange={(e) => setKmId(e.target.value)} className={inputCls} placeholder="Agent connection name" />
+            <button onClick={handleKeyInfo} disabled={kmLoading} className={btnSecondary}>Check key</button>
+            <button onClick={handleRotate} disabled={kmLoading} className={btnSecondary}>Replace key</button>
           </div>
           <div className="mt-3 space-y-2">
             <ErrorBox error={kmError} />
             {kmInfo && (
               <div className="text-[12px] text-stone-700 font-mono bg-stone-50 border border-stone-200 rounded-md px-3 py-2">
-                {kmInfo.agent_id} · {kmInfo.status} · key {kmInfo.api_key_prefix} · owner {kmInfo.owner}
+                {kmInfo.agent_id} · {humanizeConnectionStatus(kmInfo.status)} · Responsible person: {kmInfo.owner}
               </div>
             )}
             {rotated && (
@@ -268,7 +269,7 @@ function RegisterTab() {
   );
 }
 
-/* ---------------- Tab 2: connect a bot / LLM ---------------- */
+/* ---------------- Tab 2: connect an AI service ---------------- */
 function statusBadge(s) {
   const map = {
     valid: 'bg-emerald-50 text-emerald-800 border-emerald-200',
@@ -280,7 +281,7 @@ function statusBadge(s) {
   };
   return (
     <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${map[s] || 'bg-stone-100 text-stone-600 border-stone-200'}`}>
-      {s || '—'}
+      {humanizeConnectionStatus(s)}
     </span>
   );
 }
@@ -375,14 +376,14 @@ function ConnectionsTab() {
     <div className="grid lg:grid-cols-2 gap-4">
       <div className="bg-white border border-[#E6E0D3] rounded-lg p-5">
         <h3 className="text-[14px] font-semibold text-stone-900 flex items-center gap-2">
-          <Plug className="w-4 h-4" /> Paste key — auto-connect
+          <Plug className="w-4 h-4" /> Connect an AI service
         </h3>
         <p className="text-[12px] text-stone-500 mt-1 mb-4">
-          Warden encrypts the key, creates a governed passport and health-tests the endpoint by itself.
+          Connect the service your company uses. WARDEN protects the access key and checks that the connection works.
         </p>
         <form onSubmit={handleCreate} className="space-y-3">
           <div>
-            <label className={labelCls}>Provider</label>
+            <label className={labelCls}>AI service</label>
             <select value={provider} onChange={(e) => setProvider(e.target.value)} className={inputCls}>
               {providers.map((p) => (
                 <option key={p.provider} value={p.provider}>{p.display_name}</option>
@@ -395,19 +396,20 @@ function ConnectionsTab() {
               <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="ShopAssist" />
             </div>
             <div>
-              <label className={labelCls}>Model</label>
+              <label className={labelCls}>Model name</label>
               <input value={model} onChange={(e) => setModel(e.target.value)} className={inputCls} placeholder={selected?.provider === 'custom_openai' ? 'shopassist' : 'gpt-4o'} />
             </div>
           </div>
           <div>
-            <label className={labelCls}>API key {selected?.key_format_hint && <span className="text-stone-400">({selected.key_format_hint})</span>}</label>
-            <input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className={`${inputCls} font-mono`} placeholder="paste key" />
+            <label className={labelCls}>Service access key</label>
+            <input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className={`${inputCls} font-mono`} placeholder="Paste the key from your service" />
+            <p className="text-[11px] text-stone-400 mt-1">If you don’t have this key, ask the person who manages your AI service.</p>
           </div>
           {selected?.editable_base_url && (
             <div>
-              <label className={labelCls}>Bot link (base URL)</label>
+              <label className={labelCls}>Service address (for custom setup)</label>
               <input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} className={`${inputCls} font-mono`} placeholder="http://10.14.164.80:8502" />
-              <p className="text-[11px] text-stone-400 mt-1">Your bot must speak OpenAI chat format at /v1/chat/completions. LAN links need ALLOW_LOCAL_UPSTREAMS=true.</p>
+              <p className="text-[11px] text-stone-400 mt-1">Use the service address provided by your developer.</p>
             </div>
           )}
           <ErrorBox error={error} />
@@ -421,7 +423,7 @@ function ConnectionsTab() {
       <div className="space-y-3">
         {conns.length === 0 && (
           <div className="bg-white border border-[#E6E0D3] rounded-lg p-5 text-[13px] text-stone-500">
-            No connections yet — paste a key to auto-connect your first bot.
+            No services connected yet. Add a service above to get started.
           </div>
         )}
         {conns.map((c) => (
@@ -429,7 +431,7 @@ function ConnectionsTab() {
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
                 <div className="text-[13px] font-semibold text-stone-900">{c.name}</div>
-                <div className="text-[11px] text-stone-500 font-mono">{c.provider} · {c.model} · key {c.key_last4} · {c.request_count} runs / {c.blocked_count} blocked</div>
+                <div className="text-[11px] text-stone-500">{c.provider} · {c.model} · {c.request_count} requests · {c.blocked_count} stopped</div>
               </div>
               <div className="flex items-center gap-1.5">
                 {statusBadge(c.last_test_status)} {statusBadge(c.status)}
@@ -440,7 +442,7 @@ function ConnectionsTab() {
                 value={runTask[c.id] || ''}
                 onChange={(e) => setRunTask((p) => ({ ...p, [c.id]: e.target.value }))}
                 className={inputCls}
-                placeholder="Ask the bot something governed…"
+                placeholder="Describe a task to try…"
               />
               <button onClick={() => handleRun(c.id)} disabled={busy[c.id]} className={btnPrimary} title="Run governed task">
                 {busy[c.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
@@ -453,7 +455,7 @@ function ConnectionsTab() {
                   : <>
                     <div className="text-stone-900">{runRes[c.id].model_text || runRes[c.id].summary}</div>
                     {(runRes[c.id].decisions || []).map((d, i) => (
-                      <div key={i} className="text-stone-500 font-mono mt-1">• {d.action}: {d.decision}</div>
+                      <div key={i} className="text-stone-500 mt-1">• {humanizeAction(d.action)}: {humanizeDecision(d.decision)}</div>
                     ))}
                   </>}
               </div>
@@ -491,15 +493,15 @@ function ConnectionsTab() {
 export default function Connect() {
   const [tab, setTab] = useState('register');
   return (
-    <div className="p-5 max-w-[1100px]">
+    <div className="w-full min-h-full p-5">
       <h2 className="text-[16px] font-bold tracking-tight text-stone-900">Connect your agent</h2>
       <p className="text-[12px] text-stone-500 mt-0.5 mb-4">
-        Businesses onboard here: register an agent and get its key — or paste a bot/LLM key and auto-connect.
+        Add an agent or connect the AI service your company uses.
       </p>
       <div className="flex gap-1.5 mb-4">
         {[
-          { id: 'register', label: 'Register agent', icon: Bot },
-          { id: 'bot', label: 'Connect bot / LLM', icon: Plug },
+          { id: 'register', label: 'Add agent', icon: UserRound },
+          { id: 'bot', label: 'Connect AI service', icon: Plug },
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}

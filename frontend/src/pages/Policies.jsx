@@ -41,21 +41,21 @@ export default function Policies() {
   };
 
   return (
-    <div className="p-6 space-y-5 max-w-4xl mx-auto">
+    <div className="w-full min-h-full p-6 space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-stone-900">Policies</h2>
+          <h2 className="text-xl font-semibold text-stone-900">Company rules</h2>
           <p className="text-stone-500 text-[13px] mt-0.5">
             {files.length > 0
-              ? `${files.length} active policy file${files.length > 1 ? 's' : ''}${meta?.uploaded_by ? ` · uploaded by ${meta.uploaded_by}` : ''}`
-              : 'No policies uploaded yet'}
+              ? `${files.length} company rule file${files.length > 1 ? 's' : ''}${meta?.uploaded_by ? ` · added by ${meta.uploaded_by}` : ''}`
+              : 'Set the rules agents must follow'}
           </p>
         </div>
         <label className={`inline-flex items-center space-x-2 px-4 py-2 rounded-md text-[13px] font-medium cursor-pointer transition border ${
           working ? 'opacity-50 pointer-events-none' : ''
         } bg-stone-900 text-white border-stone-900 hover:bg-stone-800`}>
           {working ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          <span>{working ? 'Uploading…' : 'Upload .zip'}</span>
+          <span>{working ? 'Adding rules…' : 'Add company rules'}</span>
           <input type="file" accept=".zip" className="hidden" onChange={handleUpload} disabled={working} />
         </label>
       </div>
@@ -72,8 +72,8 @@ export default function Policies() {
       {files.length === 0 ? (
         <div className="bg-white border border-[#E6E0D3] rounded-lg p-8 text-center">
           <FileCode2 className="w-7 h-7 text-stone-300 mx-auto" />
-          <p className="text-[13px] text-stone-700 mt-2 font-medium">No policy bundle uploaded</p>
-          <p className="text-[12px] text-stone-500 mt-1">Upload a .zip containing .rego files to get started.</p>
+          <p className="text-[13px] text-stone-700 mt-2 font-medium">No company rules have been added</p>
+          <p className="text-[12px] text-stone-500 mt-1">Ask your WARDEN administrator or developer to prepare and upload the rules file (.zip).</p>
         </div>
       ) : (
         <div className="space-y-2.5">

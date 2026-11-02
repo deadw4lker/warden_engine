@@ -20,6 +20,7 @@ from app.services import (
     agent_service,
     crypto_service,
     decision_service,
+    guard_model_service,
     ledger_service,
     security_service,
     tool_registry
@@ -699,6 +700,99 @@ async def run_connection_task(
             "summary": "Execution blocked due to provider error or timeout."
         }
 
+    # ---- Layer 0 response moderation (exit check) ----
+    # The raw model reply is never returned unmoderated: Qwen3Guard classifies
+    # (task, reply) before it leaves the governed boundary.
+    final_model_text = model_result.get("text")
+    response_guard_meta: Optional[Dict[str, Any]] = None
+    if guard_model_service.guard_enabled() and final_model_text:
+        response_guard = await guard_model_service.run_response_guard(
+            existing["agent_id"], task, final_model_text,
+            existing.get("system_prompt") or "")
+        rg_safety = response_guard.get("safety")
+
+        if rg_safety == "ERROR" and guard_model_service.fail_closed():
+            fail_id = f"dec_{uuid.uuid4().hex[:12]}"
+            rg_err = str(response_guard.get("raw"))
+            err_msg = f"Blocked (Fail-Closed): response moderation guard unavailable: {rg_err}"
+
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+            UPDATE provider_connections
+            SET request_count = request_count + 1, blocked_count = blocked_count + 1
+            WHERE id = ?
+            """, (existing["id"],))
+            conn.commit()
+            conn.close()
+
+            ledger_service.append_ledger_entry(
+                event_type="CONNECTION_RUN_BLOCKED",
+                actor=actor,
+                payload={
+                    "request_id": request_id,
+                    "source_type": "connection",
+                    "source_name": existing["name"],
+                    "connection_id": existing["id"],
+                    "agent_id": existing["agent_id"],
+                    "task": task,
+                    "decision_id": fail_id,
+                    "explanation": err_msg,
+                    "decision": "BLOCKED"
+                }
+            )
+            return {
+                "task": task,
+                "model_text": None,
+                "decisions": [{
+                    "tool": "response_guard",
+                    "arguments_summary": {},
+                    "decision": "BLOCKED",
+                    "risk_level": "BLOCKED",
+                    "risk_score": 1.0,
+                    "explanation": err_msg,
+                    "decision_id": fail_id,
+                    "simulated_execution": None
+                }],
+                "summary": "Execution blocked: response moderation guard unavailable (fail-closed)."
+            }
+
+        response_guard_meta = {
+            "engine": response_guard.get("engine"),
+            "safety": rg_safety,
+            "categories": response_guard.get("categories") or [],
+            "latency_ms": response_guard.get("latency_ms"),
+            "available": response_guard.get("available"),
+            "error": None if rg_safety != "ERROR" else str(response_guard.get("raw")),
+        }
+
+        if rg_safety == "Unsafe":
+            redact_id = f"dec_{uuid.uuid4().hex[:12]}"
+            cats = ", ".join(response_guard.get("categories") or ["unsafe"])
+            withheld = (
+                "This assistant reply was withheld by WARDEN Layer 0 content guard: "
+                f"Qwen3Guard classified the response as Unsafe ({cats}). "
+                "See the ledger record for the redaction event."
+            )
+            model_result["text"] = withheld
+            final_model_text = withheld
+            response_guard_meta["redacted"] = True
+            response_guard_meta["decision_id"] = redact_id
+
+            ledger_service.append_ledger_entry(
+                event_type="GUARD_RESPONSE_REDACTED",
+                actor=existing["agent_id"],
+                payload={
+                    "request_id": request_id,
+                    "decision_id": redact_id,
+                    "source_type": "connection",
+                    "source_name": existing["name"],
+                    "connection_id": existing["id"],
+                    "task": task,
+                    "guard": response_guard_meta,
+                }
+            )
+
     raw_tool_calls = model_result.get("tool_calls", [])
     # Limit one run to at most 5 tool calls
     truncated_tool_calls = raw_tool_calls[:5]
@@ -822,10 +916,13 @@ async def run_connection_task(
         f"Model proposed {len(raw_tool_calls)} tool call(s). "
         f"Evaluated {len(tool_decisions)} governed action(s)."
     )
+    if response_guard_meta and response_guard_meta.get("redacted"):
+        summary_text += " Response moderated by content guard (LO redaction)."
 
     return {
         "task": task,
-        "model_text": model_result.get("text"),
+        "model_text": final_model_text,
         "decisions": tool_decisions,
+        "guard": {"response": response_guard_meta},
         "summary": summary_text
     }

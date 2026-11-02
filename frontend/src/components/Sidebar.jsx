@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   LayoutDashboard,
-  Bot,
+  UsersRound,
   CheckSquare,
   FileCheck2,
   ShieldCheck,
@@ -12,7 +12,7 @@ import {
 export default function Sidebar({ activeTab, onSelectTab, pendingApprovalsCount = 0 }) {
   const navItems = [
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
-    { id: 'agents', label: 'Agents', icon: Bot },
+    { id: 'agents', label: 'Agents', icon: UsersRound },
     { id: 'connect', label: 'Connect', icon: Plug },
     {
       id: 'approvals',

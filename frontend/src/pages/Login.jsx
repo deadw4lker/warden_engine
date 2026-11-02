@@ -53,18 +53,18 @@ export default function Login({ onLogin, onBack, onSignup }) {
     }`;
 
   return (
-    <div className="min-h-screen bg-[#F2EFE9] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F4F7FA] flex items-center justify-center p-4">
       <div className="w-full max-w-[380px]">
         <div className="flex items-center space-x-2.5 mb-6">
           <Logo height={30} />
           <div>
-            <p className="text-[12px] text-stone-500 mt-0.5">Agent governance console</p>
+            <p className="text-[12px] text-stone-500 mt-0.5">Company control center</p>
           </div>
         </div>
 
         <div className="bg-white border border-[#E6E0D3] rounded-lg p-6">
           <h2 className="text-[14px] font-semibold text-stone-900">Sign in</h2>
-          <p className="text-[12px] text-stone-500 mt-0.5 mb-5">Use your console credentials to continue.</p>
+          <p className="text-[12px] text-stone-500 mt-0.5 mb-5">Sign in with your company account to continue.</p>
 
           <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>

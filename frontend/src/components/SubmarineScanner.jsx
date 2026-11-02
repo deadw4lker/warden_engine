@@ -1,27 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Radar, ChevronRight } from 'lucide-react';
-
-/** deterministic position from id so contacts sit stably on the scope */
-function hashStr(s) {
-  const str = String(s ?? '');
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return Math.abs(h);
-}
-
-function contactPosition(id, index) {
-  const h = hashStr(id ?? index);
-  const angle = ((h % 360) + index * 137.5) % 360;
-  const radiusPct = 20 + ((h % 2400) / 100); // 20..44% of scope
-  const rad = (angle * Math.PI) / 180;
-  return {
-    x: 50 + radiusPct * Math.cos(rad),
-    y: 50 + radiusPct * Math.sin(rad),
-  };
-}
+import { Activity, ChevronRight } from 'lucide-react';
+import { describeLayer, humanizeAction, humanizeIdentifier, humanizeLayer } from '../utils/userText';
 
 function ageLabel(a) {
   const ts = a.created_at || a.requested_at || a.timestamp || a.createdAt;
@@ -68,8 +47,7 @@ function stageCap(layers) {
 
 function LayerChips({ approval, revealed = 99 }) {
   const st = layerStatus(approval);
-  if (!st) return <span className="text-[10px] font-mono text-stone-400">layers n/a</span>;
-  const layers = contactLayers(approval);
+  if (!st) return <span className="text-[10px] text-stone-400">No check details</span>;
   return (
     <span className="inline-flex items-center gap-1 ml-1.5 align-middle">
       {['L1', 'L2', 'L3', 'L4'].map((l, li) => {
@@ -86,10 +64,10 @@ function LayerChips({ approval, revealed = 99 }) {
           : 'bg-stone-100 text-stone-400 border-stone-200';
         const mark = !seen ? '·' : r === 'pass' ? '✓' : r === 'fail' ? '✗' : '·';
         return (
-          <span key={l} title={entry ? `${entry.check}: ${entry.detail}` : l}
-            className={`text-[9px] font-mono font-bold px-1.5 py-px rounded border transition-opacity ${cls}`}
+          <span key={l} title={entry ? `${humanizeLayer(l)}: ${describeLayer(entry)}` : humanizeLayer(l)}
+            className={`text-[9px] font-semibold px-1.5 py-px rounded border transition-opacity ${cls}`}
             style={{ opacity: seen ? 1 : 0.55 }}>
-            {l}{mark}
+            {humanizeLayer(l).replace(' check', '')}{mark}
           </span>
         );
       })}
@@ -97,33 +75,40 @@ function LayerChips({ approval, revealed = 99 }) {
   );
 }
 
-/** Blip look for the current clearing stage. */
-function blipLook(a, stage) {
-  const layers = contactLayers(a);
-  if (!layers.length) {
-    return { dot: 'bg-stone-300 border-white', ring: null, tag: null, done: true };
-  }
-  const revealed = layers.slice(0, stage);
-  const failed = revealed.find((l) => l && l.result === 'fail' && l.check !== 'not evaluated');
-  if (failed) {
-    return { dot: 'bg-red-500 border-white', ring: 'rgba(239,68,68,0.45)', tag: `${failed.layer} ✗`, done: true };
-  }
-  if (stage >= layers.length) {
-    return { dot: 'bg-emerald-500 border-white', ring: 'rgba(16,185,129,0.4)', tag: null, done: true };
-  }
-  const current = layers[stage];
+const STEP_MS = 650;
+const WEB_RAY_COUNT = 8;
+const WEB_CENTER = 150;
+const WEB_OUTER_RADIUS = 138;
+const WEB_RINGS = [34, 60, 86, 112, WEB_OUTER_RADIUS];
+
+function webPoint(radius, angle) {
   return {
-    dot: 'bg-amber-400 border-white',
-    ring: 'rgba(245,158,11,0.5)',
-    tag: current ? current.layer : null,
-    done: false,
+    x: WEB_CENTER + Math.cos(angle) * radius,
+    y: WEB_CENTER + Math.sin(angle) * radius,
   };
 }
 
-const STEP_MS = 650;
+function webRingPath(radius) {
+  const angleStep = (Math.PI * 2) / WEB_RAY_COUNT;
+  return Array.from({ length: WEB_RAY_COUNT }, (_, i) => {
+    const startAngle = -Math.PI / 2 + i * angleStep;
+    const endAngle = startAngle + angleStep;
+    const start = webPoint(radius, startAngle);
+    const control = webPoint(radius * 0.78, (startAngle + endAngle) / 2);
+    const end = webPoint(radius, endAngle);
+    return `M ${start.x} ${start.y} Q ${control.x} ${control.y} ${end.x} ${end.y}`;
+  }).join(' ');
+}
+
+function webDotPosition(kind, slot) {
+  const radius = { pending: 60, denied: 112, allowed: 86 }[kind] || 86;
+  const angleOffset = { pending: -90, denied: -67.5, allowed: -45 }[kind] || -90;
+  const angle = ((angleOffset + slot * (360 / 8)) * Math.PI) / 180;
+  const point = webPoint(radius, angle);
+  return { left: `${(point.x / 300) * 100}%`, top: `${(point.y / 300) * 100}%` };
+}
 
 export default function SubmarineScanner({ items = [], blocked = [], allowed = [], onOpenQueue, onOpenLedger }) {
-  const [bearing, setBearing] = useState(0);
   const [selectedId, setSelectedId] = useState(null);
   // stage per contact id: how many layers have been revealed (0..n)
   const [stages, setStages] = useState({});
@@ -153,7 +138,7 @@ export default function SubmarineScanner({ items = [], blocked = [], allowed = [
     return list.filter((a) => String(a?.status || '').toUpperCase() === 'ALLOWED');
   }, [allowed]);
 
-  // One unified scope: every governed request, pending first, then newest first.
+  // One unified activity list: pending first, then stopped and allowed requests.
   const all = useMemo(() => {
     const tagged = [
       ...pending.map((a) => ({ ...a, _kind: 'pending' })),
@@ -169,17 +154,16 @@ export default function SubmarineScanner({ items = [], blocked = [], allowed = [
     return tagged;
   }, [pending, denied, allowedList]);
 
-  const scopeContacts = useMemo(() => all.slice(0, 12), [all]);
+  const webDots = useMemo(() => ([
+    ...pending.slice(0, 8).map((request, slot) => ({ ...request, _kind: 'pending', _webSlot: slot })),
+    ...denied.slice(0, 8).map((request, slot) => ({ ...request, _kind: 'denied', _webSlot: slot })),
+    ...allowedList.slice(0, 8).map((request, slot) => ({ ...request, _kind: 'allowed', _webSlot: slot })),
+  ]), [pending, denied, allowedList]);
 
   // keep a fresh layer lookup for the stepper interval
   all.forEach((v) => {
     layersByIdRef.current[String(v.id)] = contactLayers(v);
   });
-
-  useEffect(() => {
-    const iv = setInterval(() => setBearing((b) => (b + 4) % 360), 120);
-    return () => clearInterval(iv);
-  }, []);
 
   useEffect(() => {
     if (all.length > 0 && !all.some((v) => String(v.id) === String(selectedId))) {
@@ -256,15 +240,15 @@ export default function SubmarineScanner({ items = [], blocked = [], allowed = [
   const selDone = selFailed ? true : selStage >= selLayers.length;
 
   return (
-    <section className="bg-white border border-[#E6E0D3] rounded-lg">
+    <section className="glass-surface rounded-lg">
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-stone-200">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 rounded-md bg-stone-900 text-white">
-            <Radar className="w-4 h-4" />
+            <Activity className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-semibold text-[13px] text-stone-900 leading-tight">Pending approvals radar</h3>
-            <p className="text-[11px] text-stone-500">Watch each request clear L1 → L2 → L3 → L4 live</p>
+            <h3 className="font-semibold text-[13px] text-stone-900 leading-tight">Agent activity</h3>
+            <p className="text-[11px] text-stone-500">See what agents request and how WARDEN responds.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -273,108 +257,86 @@ export default function SubmarineScanner({ items = [], blocked = [], allowed = [
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-stone-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-stone-500" />
             </span>
-            Live
+            Updating
           </span>
           <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ${
             all.length > 0
               ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-500'
           }`}>
-            {all.length} on scope
+            {all.length} requests
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-0">
-        {/* scope */}
+      <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-0">
         <div className="p-4 md:border-r border-b md:border-b-0 border-stone-200">
-          <div className="relative aspect-square rounded-full bg-stone-50 border border-stone-200 overflow-hidden mx-auto max-w-[280px]">
-            {/* degree ticks */}
-            {Array.from({ length: 48 }).map((_, i) => (
-              <span
-                key={i}
-                className="absolute left-1/2 top-1/2 bg-stone-300"
-                style={{
-                  width: 1,
-                  height: i % 12 === 0 ? 8 : 4,
-                  transform: `translate(-50%, -50%) rotate(${i * 7.5}deg) translateY(-118px)`,
-                }}
-              />
-            ))}
-            {/* range rings + crosshairs */}
-            {[25, 50, 75, 100].map((r) => (
-              <div key={r} className="absolute rounded-full border border-stone-200" style={{ inset: `${50 - r / 2}%` }} />
-            ))}
-            <div className="absolute left-1/2 top-[5%] bottom-[5%] w-px bg-stone-200 -translate-x-1/2" />
-            <div className="absolute top-1/2 left-[5%] right-[5%] h-px bg-stone-200 -translate-y-1/2" />
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div>
+              <h4 className="text-sm font-semibold text-stone-900">Request map</h4>
+              <p className="text-[11px] text-stone-500 mt-0.5">Select a dot to inspect a request</p>
+            </div>
+            <span className="shrink-0 rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[10px] font-semibold text-stone-600">
+              {webDots.length} shown
+            </span>
+          </div>
 
-            {/* sweep */}
-            <div className="sonar-sweep-light absolute inset-0 rounded-full" />
-            <div
-              className="absolute left-1/2 top-1/2 h-[2px] bg-stone-500/70 origin-left rounded"
-              style={{ width: '45%', transform: `rotate(${bearing}deg)` }}
-            />
+          <div className="relative mx-auto aspect-square w-full max-w-[300px] overflow-hidden rounded-xl border border-[#D5E3E8] bg-gradient-to-br from-[#F8FBFC] via-white to-[#F2F7F9]">
+            <svg aria-hidden="true" viewBox="0 0 300 300" className="absolute inset-0 h-full w-full">
+              <g fill="none" stroke="#8DAEB8" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" opacity="0.64">
+                {Array.from({ length: WEB_RAY_COUNT }).map((_, i) => {
+                  const point = webPoint(WEB_OUTER_RADIUS, -Math.PI / 2 + i * ((Math.PI * 2) / WEB_RAY_COUNT));
+                  return <line key={`ray-${i}`} x1={WEB_CENTER} y1={WEB_CENTER} x2={point.x} y2={point.y} />;
+                })}
+                {WEB_RINGS.map((radius) => <path key={`ring-${radius}`} d={webRingPath(radius)} />)}
+              </g>
+              <circle cx={WEB_CENTER} cy={WEB_CENTER} r="2.5" fill="#6D9BA8" opacity="0.7" />
+            </svg>
 
-            {/* contacts: every governed request on one scope */}
-            {scopeContacts.map((a, i) => {
-              const pos = contactPosition(a.id, i);
-              const isSel = String(a.id) === String(selectedId);
-              const id = String(a.id);
-              const stage = stages[id] ?? stageCap(contactLayers(a));
-              const look = blipLook(a, stage);
+            {webDots.map((request) => {
+              const dotPosition = webDotPosition(request._kind, request._webSlot);
+              const isSelected = String(request.id) === String(selectedId);
+              const dotTone = request._kind === 'pending'
+                ? 'bg-amber-400'
+                : request._kind === 'denied'
+                ? 'bg-red-500'
+                : 'bg-emerald-500';
+              const statusLabel = request._kind === 'pending'
+                ? 'Needs review'
+                : request._kind === 'denied' ? 'Rejected' : 'Approved';
               return (
                 <button
-                  key={a.id ?? i}
-                  onClick={() => handleSelect(a.id)}
-                  title={`${a.action || a.action_type || 'request'} · ${a.agent_id || ''}`}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full focus:outline-none"
-                  style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+                  key={`web-${request._kind}-${request.id ?? request._webSlot}`}
+                  type="button"
+                  onClick={() => handleSelect(request.id)}
+                  aria-label={`${statusLabel}: ${humanizeAction(request.action || request.action_type)} by ${humanizeIdentifier(request.agent_id || 'Unknown agent')}`}
+                  className="absolute z-10 grid h-7 w-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#367F92] focus-visible:ring-offset-1"
+                  style={dotPosition}
                 >
-                  {!look.done && look.ring && (
-                    <span
-                      className="sonar-ping-ring absolute -inset-1.5 rounded-full border-2"
-                      style={{ borderColor: look.ring }}
-                    />
-                  )}
-                  <span
-                    className={`sonar-blip-light block rounded-full border-2 transition-colors duration-500 ${look.dot}`}
-                    style={{
-                      width: isSel ? 14 : 11,
-                      height: isSel ? 14 : 11,
-                      animationDelay: `${(i % 6) * 0.4}s`,
-                      boxShadow: isSel ? '0 0 0 3px rgba(28,25,23,0.12)' : undefined,
-                    }}
-                  />
-                  {look.tag && (
-                    <span className="absolute left-3.5 -top-1 whitespace-nowrap text-[9px] font-mono font-bold px-1.5 py-px rounded border bg-white/95 border-stone-300 text-stone-700">
-                      {look.tag}
-                    </span>
-                  )}
+                  <span aria-hidden="true" className={`h-3.5 w-3.5 rounded-full border-2 border-white shadow-[0_1px_4px_rgba(22,52,65,0.35)] transition-transform ${dotTone} ${isSelected ? 'scale-125 ring-2 ring-[#367F92] ring-offset-2 ring-offset-white' : ''}`} />
                 </button>
               );
             })}
 
-            {/* own-ship marker */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="w-2.5 h-2.5 rounded-full bg-white border-2 border-stone-400" />
-            </div>
-
-            {all.length === 0 && (
-              <div className="absolute inset-x-0 bottom-6 flex justify-center">
-                <span className="text-[11px] text-stone-400 bg-white border border-stone-200 rounded-full px-3 py-1">
-                  Nothing on scope yet — every request sweeps in here
-                </span>
+            {webDots.length === 0 && (
+              <div className="absolute inset-x-5 bottom-4 rounded-md bg-white/90 px-3 py-2 text-center text-[11px] text-stone-500 shadow-sm">
+                No requests to show yet
               </div>
             )}
           </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-stone-500 font-mono max-w-[280px] mx-auto">
-            <span>Bearing {String(Math.round(bearing)).padStart(3, '0')}°</span>
-            <span>{scopeContacts.length}/{all.length} on scope</span>
-          </div>
-          {/* legend */}
-          <div className="mt-2 flex items-center justify-center gap-3 text-[10px] font-mono text-stone-400 max-w-[280px] mx-auto">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> clearing</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> cleared</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" /> denied</span>
+
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <div className="flex flex-col items-center gap-1 rounded-md border border-amber-200 bg-amber-50 py-2">
+              <span className="flex items-center gap-1.5 text-[10px] font-medium text-amber-800"><span className="h-2 w-2 rounded-full bg-amber-400" />Review</span>
+              <span className="text-sm font-bold tabular-nums text-amber-800">{pending.length}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 py-2">
+              <span className="flex items-center gap-1.5 text-[10px] font-medium text-emerald-800"><span className="h-2 w-2 rounded-full bg-emerald-500" />Approve</span>
+              <span className="text-sm font-bold tabular-nums text-emerald-800">{allowedList.length}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 rounded-md border border-red-200 bg-red-50 py-2">
+              <span className="flex items-center gap-1.5 text-[10px] font-medium text-red-800"><span className="h-2 w-2 rounded-full bg-red-500" />Reject</span>
+              <span className="text-sm font-bold tabular-nums text-red-800">{denied.length}</span>
+            </div>
           </div>
         </div>
 
@@ -382,10 +344,10 @@ export default function SubmarineScanner({ items = [], blocked = [], allowed = [
         <div className="min-w-0 flex flex-col">
           <div className="px-4 py-2 border-b border-stone-100 flex items-center justify-between gap-2">
             <span className="text-[11px] font-medium text-stone-500">
-              All governed requests
+              Recent agent requests
             </span>
             <span className="text-[11px] font-mono text-stone-400">
-              {pending.length} waiting · {denied.length} denied · {allowedList.length} allowed
+              {pending.length} need review · {denied.length} stopped · {allowedList.length} allowed
             </span>
           </div>
           <div className="flex-1 overflow-y-auto max-h-[320px] divide-y divide-stone-100">
@@ -395,13 +357,13 @@ export default function SubmarineScanner({ items = [], blocked = [], allowed = [
                   No requests yet
                 </p>
                 <p className="text-[12px] text-stone-400 mt-1">
-                  Every approval, denial and auto-approval will sweep in here with its layers.
+                  Requests waiting for review, allowed, or stopped will appear here.
                 </p>
               </div>
             ) : (
               all.map((a, i) => {
                 const isSel = String(a.id) === String(selectedId);
-                const action = a.action || a.action_type || 'Unknown action';
+                const action = humanizeAction(a.action || a.action_type);
                 const st = stages[String(a.id)] ?? stageCap(contactLayers(a));
                 return (
                   <button
@@ -426,12 +388,12 @@ export default function SubmarineScanner({ items = [], blocked = [], allowed = [
                             ? 'bg-red-50 text-red-700 border-red-200'
                             : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         }`}>
-                          {a._kind === 'pending' ? 'WAITING' : a._kind === 'denied' ? 'DENIED' : 'ALLOWED'}
+                          {a._kind === 'pending' ? 'Needs review' : a._kind === 'denied' ? 'Stopped' : 'Allowed'}
                         </span>
                         <LayerChips approval={a} revealed={st} />
                       </span>
                       <span className="block text-[11px] text-stone-500 font-mono truncate mt-0.5">
-                        {a.agent_id || 'unknown-agent'}
+                        {humanizeIdentifier(a.agent_id || 'Unknown agent')}
                         {a.amount > 0 ? ` · $${a.amount}` : ''} · {ageLabel(a)}
                       </span>
                     </span>
@@ -447,7 +409,7 @@ export default function SubmarineScanner({ items = [], blocked = [], allowed = [
                 onClick={onOpenQueue}
                 className="w-full py-2 bg-stone-900 hover:bg-stone-800 text-white font-medium rounded-md text-[13px] transition"
               >
-                {`Review ${pending.length} pending request${pending.length > 1 ? 's' : ''} →`}
+                {`Review ${pending.length} request${pending.length > 1 ? 's' : ''} →`}
               </button>
             ) : (
               <button
@@ -455,27 +417,26 @@ export default function SubmarineScanner({ items = [], blocked = [], allowed = [
                 disabled={all.length === 0}
                 className="w-full py-2 bg-stone-900 hover:bg-stone-800 disabled:opacity-40 disabled:hover:bg-stone-900 text-white font-medium rounded-md text-[13px] transition"
               >
-                {all.length > 0 ? 'Inspect full trail in activity log →' : 'Nothing on scope yet'}
+                {all.length > 0 ? 'View all activity →' : 'No activity yet'}
               </button>
             )}
             {selected && (
               <div className="mt-2 rounded-md bg-stone-50 border border-stone-200 px-3 py-2">
                 <p className="text-[11px] text-stone-500 font-mono truncate text-center">
-                  Selected: {selected.action || selected.action_type} — {selected.agent_id}
+                  Request: {humanizeAction(selected.action || selected.action_type)} · {humanizeIdentifier(selected.agent_id)}
                 </p>
-                {/* live sweep status */}
+                {/* live check status */}
                 <p className="text-center text-[11px] font-mono font-bold mt-1.5" key={`st-${replayKey[String(selected.id)] || 0}`}>
                   {!selLayers.length ? (
-                    <span className="text-stone-400">Layer detail not recorded for this request.</span>
+                    <span className="text-stone-400">No extra check details were saved for this request.</span>
                   ) : selFailed ? (
-                    <span className="text-red-600">■ Held at {selFailed.layer} — {selFailed.check}</span>
+                    <span className="text-red-600">■ Stopped · {describeLayer(selFailed)}</span>
                   ) : !selDone ? (
                     <span className="text-amber-600">
-                      ◉ Clearing {selLayers[Math.min(selStage, selLayers.length - 1)]?.layer}
-                      {' — '}{selLayers[Math.min(selStage, selLayers.length - 1)]?.check}…
+                      ◉ Checking {humanizeLayer(selLayers[Math.min(selStage, selLayers.length - 1)]?.layer)}…
                     </span>
                   ) : (
-                    <span className="text-emerald-600">✓ All layers cleared</span>
+                    <span className="text-emerald-600">✓ All checks passed</span>
                   )}
                 </p>
                 {selLayers.length > 0 && (
@@ -493,9 +454,9 @@ export default function SubmarineScanner({ items = [], blocked = [], allowed = [
                           }`}>
                             {!revealed ? '○' : l.result === 'pass' ? '✓' : l.result === 'fail' ? '✗' : '·'}
                           </span>
-                          <span className="font-mono font-semibold text-stone-700 shrink-0">{l.layer}</span>
-                          <span className="text-stone-500 truncate" title={l.detail}>
-                            {revealed ? (l.detail || l.check) : `waiting for sweep…`}
+                          <span className="font-semibold text-stone-700 shrink-0">{humanizeLayer(l.layer).replace(' check', '')}</span>
+                          <span className="text-stone-500 truncate">
+                            {revealed ? describeLayer(l) : 'Checking next…'}
                           </span>
                         </li>
                       );

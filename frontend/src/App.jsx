@@ -10,7 +10,6 @@ import LedgerExplorer from './pages/LedgerExplorer';
 import Policies from './pages/Policies';
 import Reports from './pages/Reports';
 import Connect from './pages/Connect';
-import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 
 export default function App() {
@@ -71,18 +70,17 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#F2EFE9]">
-      <Navbar user={user} onLogout={handleLogout} />
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          activeTab={activeTab}
-          onSelectTab={setActiveTab}
-          pendingApprovalsCount={pendingCount}
-        />
-        <main className="flex-1 overflow-y-auto">
-          {pages[activeTab] || pages.dashboard}
-        </main>
-      </div>
+    <div className="flex h-screen flex-col overflow-hidden bg-[#F4F7FA]">
+      <Navbar
+        user={user}
+        onLogout={handleLogout}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        pendingApprovalsCount={pendingCount}
+      />
+      <main className="min-h-0 flex-1 overflow-y-auto">
+        {pages[activeTab] || pages.dashboard}
+      </main>
     </div>
   );
 }
